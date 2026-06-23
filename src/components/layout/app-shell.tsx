@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { SyncIndicator } from "@/components/layout/sync-indicator";
+import { LockIcon } from "@/components/ui/lock-indicator";
 import { springMicro, springSnappy, pageEnter } from "@/lib/motion/presets";
 import {
   Tooltip,
@@ -194,7 +195,7 @@ export function AppShell({ children }: AppShellProps) {
                       {!collapsed && (
                         <>
                           <span className="truncate flex-1 relative z-10">{roadmap.title}</span>
-                          {roadmap.isLocked && <span className="text-[10px] relative z-10">🔒</span>}
+                          {roadmap.isLocked && <LockIcon className="relative z-10" />}
                           {isCurrent && !isActive && (
                             <motion.span
                               className="h-1.5 w-1.5 rounded-full bg-accent shrink-0 relative z-10"

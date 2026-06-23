@@ -19,7 +19,7 @@ import { motion } from "motion/react";
 import type { Roadmap, ZoomLevel } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { LockBadge } from "@/components/ui/lock-indicator";
 import { SyncIndicator } from "@/components/layout/sync-indicator";
 import {
   Dialog,
@@ -137,13 +137,13 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
                   >
                     {roadmap.title}
                   </h1>
-                  {roadmap.isLocked && <Badge variant="secondary">🔒 Locked</Badge>}
+                  {roadmap.isLocked && <LockBadge />}
                 </div>
               )}
               <div className="flex items-center gap-3 mt-1">
                 <p className="text-sm text-muted-foreground">
                   {new Date(roadmap.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                  {" → "}
+                  {" – "}
                   {new Date(roadmap.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                 </p>
                 <SyncIndicator status={syncStatus} />

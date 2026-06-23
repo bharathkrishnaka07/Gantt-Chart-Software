@@ -9,7 +9,7 @@ export function formatDateRange(start: Date, end: Date): string {
   const opts: Intl.DateTimeFormatOptions = { month: "short" };
   const startStr = start.toLocaleDateString("en-US", opts);
   const endStr = end.toLocaleDateString("en-US", { ...opts, year: "numeric" });
-  return `${startStr} → ${endStr}`;
+  return `${startStr} – ${endStr}`;
 }
 
 export function formatShortDate(date: Date): string {

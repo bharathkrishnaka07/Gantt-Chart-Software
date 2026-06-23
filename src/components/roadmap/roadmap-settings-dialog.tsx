@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, History, Copy } from "lucide-react";
+import { Trash2, History, Copy, Lock } from "lucide-react";
 import type { Roadmap } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { Button } from "@/components/ui/button";
@@ -105,8 +105,9 @@ export function RoadmapSettingsDialog({
             )}
 
             {roadmap.isLocked && (
-              <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
-                🔒 Unlock this roadmap to edit title and description.
+              <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 flex items-start gap-2">
+                <Lock className="h-4 w-4 shrink-0 mt-0.5" aria-hidden />
+                Unlock this roadmap to edit title and description.
               </p>
             )}
 

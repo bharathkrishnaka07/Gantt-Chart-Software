@@ -12,7 +12,6 @@ import {
   Layers,
   CheckCircle2,
   Target,
-  Sparkles,
 } from "lucide-react";
 import { useRoadmapStore, TEMPLATE_LIST } from "@/lib/stores/roadmap-store";
 import { Button } from "@/components/ui/button";
@@ -95,14 +94,6 @@ export function Dashboard() {
         <motion.div variants={staggerItem}>
           <GlowBorder innerClassName="stat-glow overflow-hidden">
             <div className="relative p-6 sm:p-8">
-              <motion.div
-                className="absolute top-4 right-4 opacity-20"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="h-24 w-24 text-primary" />
-              </motion.div>
-
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
                 <div>
                   <motion.div

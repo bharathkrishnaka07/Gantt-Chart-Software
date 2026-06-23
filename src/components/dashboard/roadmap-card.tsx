@@ -15,6 +15,7 @@ import {
 import type { Roadmap } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { Button } from "@/components/ui/button";
+import { LockBadge } from "@/components/ui/lock-indicator";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -78,9 +79,7 @@ export function RoadmapCard({ roadmap, isActive }: RoadmapCardProps) {
                 <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
                   {roadmap.title}
                 </h3>
-                {roadmap.isLocked && (
-                  <Badge variant="secondary" className="text-[10px] shrink-0">🔒</Badge>
-                )}
+                {roadmap.isLocked && <LockBadge showLabel={false} />}
               </div>
               <p className="text-xs text-muted-foreground">
                 {formatDateRange(new Date(roadmap.startDate), new Date(roadmap.endDate))}

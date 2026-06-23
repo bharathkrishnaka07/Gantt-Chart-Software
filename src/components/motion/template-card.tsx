@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 import { springBouncy, springCinematic } from "@/lib/motion/presets";
 import { cn } from "@/lib/utils";
 
@@ -51,11 +52,12 @@ export function TemplateCard({
       <p className="relative font-semibold text-sm">{name}</p>
       <p className="relative text-xs text-muted-foreground mt-1.5 leading-relaxed">{description}</p>
       <motion.span
-        className="absolute bottom-3 right-3 text-[10px] font-semibold text-primary opacity-0 group-hover:opacity-100"
+        className="absolute bottom-3 right-3 inline-flex items-center gap-1 text-[10px] font-semibold text-primary opacity-0 group-hover:opacity-100"
         initial={false}
         transition={springBouncy}
       >
-        Use →
+        Use template
+        <ArrowRight className="h-3 w-3" />
       </motion.span>
     </motion.button>
   );

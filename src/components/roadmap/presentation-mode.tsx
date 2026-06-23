@@ -144,7 +144,7 @@ export function PresentationMode({ roadmap }: PresentationModeProps) {
             transition={{ delay: 0.2 }}
             className="text-center text-xs text-muted-foreground py-3 shrink-0 bg-white/80 border-t border-border/40"
           >
-            ← → scroll timeline · Esc or Exit to leave fullscreen
+            Arrow keys scroll timeline · Esc or Exit to leave fullscreen
           </motion.p>
         </motion.div>
       )}

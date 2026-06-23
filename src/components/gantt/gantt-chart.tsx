@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Lock } from "lucide-react";
 import { motion } from "motion/react";
-import type { Roadmap, RoadmapTask, DragMode } from "@/types/roadmap";
+import type { Roadmap, DragMode } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import {
   buildTimelineColumns,
@@ -415,7 +416,8 @@ export function GanttChart({
           animate={{ opacity: 1, y: 0 }}
           className="absolute bottom-4 right-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-lg"
         >
-          🔒 Roadmap Locked
+          <Lock className="h-4 w-4" aria-hidden />
+          Roadmap locked
         </motion.div>
       )}
     </motion.div>
