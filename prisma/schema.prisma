@@ -128,3 +128,10 @@ model RoadmapVersion {
 
   @@index([roadmapId])
 }
+
+model AppState {
+  id              String   @id @default("global")
+  activeRoadmapId String?
+  recentActivity  Json     @default("[]")
+  updatedAt       DateTime @updatedAt
+}

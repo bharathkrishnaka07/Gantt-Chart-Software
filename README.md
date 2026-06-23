@@ -48,13 +48,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) — the app ships with sample PM career roadmap data pre-loaded.
 
-### Database Setup (Optional)
+### Database Setup (Required for persistence)
 
 ```bash
-# Configure DATABASE_URL in .env
+# Copy DATABASE_URL into .env (Prisma CLI reads .env, Next.js reads .env.development.local)
+cp .env.development.local .env   # or paste DATABASE_URL manually
+
+# Push schema to Neon/Postgres (run after deploy or locally)
 npm run db:push
-npm run db:seed
 ```
+
+Roadmaps are stored in **Neon PostgreSQL** and sync automatically via `/api/sync`. Without a valid `DATABASE_URL` on Vercel, data will not persist between sessions.
 
 ## Folder Structure
 
@@ -145,7 +149,7 @@ Deploy to Vercel:
 vercel
 ```
 
-Set `DATABASE_URL` environment variable for PostgreSQL persistence. Without it, the app uses client-side localStorage.
+Set `DATABASE_URL` in Vercel environment variables, then run `npm run db:push` against production once to create tables. Roadmaps sync to Neon automatically on every change.
 
 ## Templates
 
