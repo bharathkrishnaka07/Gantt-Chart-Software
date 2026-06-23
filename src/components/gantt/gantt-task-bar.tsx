@@ -2,7 +2,17 @@
 
 import { motion } from "motion/react";
 import type { RoadmapTask } from "@/types/roadmap";
-import { getTaskBackground, getTaskBorderAccent, MIN_TASK_WIDTH } from "@/lib/gantt/collision";
+import {
+  getTaskBackground,
+  getTaskBorderAccent,
+  MIN_TASK_WIDTH,
+  TASK_ROW_HEIGHT,
+} from "@/lib/gantt/collision";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface GanttTaskBarProps {
@@ -33,23 +43,27 @@ export function GanttTaskBar({
   const isDone = task.status === "done";
   const accent = getTaskBorderAccent(task.color ?? laneColor ?? "#2563EB");
   const background = getTaskBackground(laneColor ?? task.color ?? "#2563EB");
+  const barWidth = Math.max(width, MIN_TASK_WIDTH);
 
-  return (
+  const bar = (
     <motion.div
-      initial={{ opacity: 0, scaleX: 0.8 }}
-      animate={{ opacity: isDone ? 0.65 : 1, scaleX: 1 }}
+      initial={{ opacity: 0, scaleX: 0.92 }}
+      animate={{ opacity: 1, scaleX: 1 }}
       transition={{ type: "spring", stiffness: 400, damping: 32 }}
       className={cn(
-        "task-bar absolute flex h-9 items-center gap-1.5 rounded-lg border border-white/20 px-2.5 text-[11px] font-medium text-slate-700 select-none",
+        "task-bar absolute flex items-center gap-2 rounded-xl border border-white/30 px-3 text-sm font-medium select-none",
         !isLocked && "cursor-grab active:cursor-grabbing",
-        isSelected && "ring-2 ring-primary/30 ring-offset-1 ring-offset-transparent z-10",
-        isDone && "line-through decoration-slate-500/50"
+        isSelected && "ring-2 ring-primary/40 ring-offset-1 ring-offset-transparent z-10",
+        isDone
+          ? "text-slate-500 line-through decoration-slate-400/70"
+          : "text-slate-800"
       )}
       style={{
         left,
         top,
-        width: Math.max(width, MIN_TASK_WIDTH),
-        backgroundColor: background,
+        width: barWidth,
+        height: TASK_ROW_HEIGHT,
+        backgroundColor: isDone ? "rgba(241, 245, 249, 0.95)" : background,
         zIndex: row + 1,
       }}
       onClick={(e) => {
@@ -63,25 +77,40 @@ export function GanttTaskBar({
       }}
     >
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
-        style={{ background: accent }}
+        className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl"
+        style={{ background: isDone ? "#94a3b8" : accent }}
       />
       {!isLocked && (
         <>
           <div
             className="task-bar-resize-handle left"
-            onPointerDown={(e) => { e.stopPropagation(); onDragStart(e, "resize-start"); }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              onDragStart(e, "resize-start");
+            }}
           />
           <div
             className="task-bar-resize-handle right"
-            onPointerDown={(e) => { e.stopPropagation(); onDragStart(e, "resize-end"); }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              onDragStart(e, "resize-end");
+            }}
           />
         </>
       )}
-      {task.priority === "high" && (
-        <span className="ml-1 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: accent }} />
+      {task.priority === "high" && !isDone && (
+        <span className="ml-1 h-2 w-2 rounded-full shrink-0" style={{ background: accent }} />
       )}
-      <span className="truncate ml-1">{task.title}</span>
+      <span className="truncate ml-1 pr-1">{task.title}</span>
     </motion.div>
+  );
+
+  return (
+    <Tooltip delayDuration={400}>
+      <TooltipTrigger asChild>{bar}</TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs text-sm">
+        {task.title}
+      </TooltipContent>
+    </Tooltip>
   );
 }

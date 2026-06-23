@@ -14,17 +14,12 @@ import {
   startOfYear,
 } from "date-fns";
 import type { TimelineColumn, ZoomLevel } from "@/types/roadmap";
-import { MIN_TASK_WIDTH } from "@/lib/gantt/collision";
+import { MIN_TASK_WIDTH, COLUMN_WIDTHS, LANE_HEADER_WIDTH, TIMELINE_HEADER_HEIGHT, MILESTONE_ROW_HEIGHT } from "@/lib/gantt/layout";
 
-const COLUMN_WIDTHS: Record<ZoomLevel, number> = {
-  year: 120,
-  quarter: 100,
-  month: 140,
-  week: 80,
-};
+const COLUMN_WIDTHS_MAP: Record<ZoomLevel, number> = COLUMN_WIDTHS;
 
 export function getColumnWidth(zoom: ZoomLevel): number {
-  return COLUMN_WIDTHS[zoom];
+  return COLUMN_WIDTHS_MAP[zoom];
 }
 
 export function parseDate(dateStr: string): Date {
@@ -188,6 +183,5 @@ export function getMilestonePosition(
   return dateToPixel(date, columns, timelineStart, timelineEnd);
 }
 
-export const LANE_HEIGHT = 72;
-export const LANE_HEADER_WIDTH = 220;
-export const TIMELINE_HEADER_HEIGHT = 56;
+export const LANE_HEIGHT = 88;
+export { LANE_HEADER_WIDTH, TIMELINE_HEADER_HEIGHT, MILESTONE_ROW_HEIGHT } from "@/lib/gantt/layout";

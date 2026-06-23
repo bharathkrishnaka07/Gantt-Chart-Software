@@ -15,6 +15,7 @@ import {
   toISODate,
   TIMELINE_HEADER_HEIGHT,
 } from "@/lib/timeline";
+import { LANE_HEADER_WIDTH, MILESTONE_ROW_HEIGHT } from "@/lib/gantt/layout";
 import { layoutTasksInLane } from "@/lib/gantt/collision";
 import { GanttTimelineHeader } from "./gantt-timeline-header";
 import { GanttSwimLaneRow } from "./gantt-swim-lane-row";
@@ -148,7 +149,7 @@ export function GanttChart({
       const scrollLeft = scrollRef.current?.scrollLeft ?? 0;
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = e.clientX - rect.left + scrollLeft - 220;
+      const x = e.clientX - rect.left + scrollLeft - LANE_HEADER_WIDTH;
       const date = pixelToDate(x, columns, timelineStart, timelineEnd);
       updateMilestone(roadmap.id, milestoneDrag.id, {
         date: toISODate(clampDate(snapToDay(date), timelineStart, timelineEnd)),
@@ -168,12 +169,12 @@ export function GanttChart({
   const sortedLanes = [...roadmap.swimLanes].sort((a, b) => a.order - b.order);
   const totalHeight =
     sortedLanes.reduce((h, lane) => {
-      if (lane.collapsed) return h + 40;
+      if (lane.collapsed) return h + 48;
       const laneTasks = roadmap.tasks.filter((t) => t.laneId === lane.id);
       return h + layoutTasksInLane(laneTasks, getRect).contentHeight;
     }, 0) +
     TIMELINE_HEADER_HEIGHT +
-    52;
+    MILESTONE_ROW_HEIGHT;
 
   const todayLeft =
     new Date() >= timelineStart && new Date() <= timelineEnd
@@ -181,18 +182,18 @@ export function GanttChart({
       : null;
 
   return (
-    <div className="relative surface-card overflow-hidden">
+    <div className="relative surface-card overflow-hidden border-border/60">
       <div
         ref={scrollRef}
-        className="gantt-scroll overflow-auto"
+        className="gantt-scroll overflow-auto bg-white/50"
         style={{
           maxHeight: presentationMode
-            ? "calc(100vh - 140px)"
-            : "calc(100vh - 200px)",
-          height: presentationMode ? "calc(100vh - 140px)" : undefined,
+            ? "calc(100vh - 132px)"
+            : "calc(100vh - 168px)",
+          height: presentationMode ? "calc(100vh - 132px)" : "calc(100vh - 168px)",
         }}
       >
-        <div ref={timelineRef} style={{ minWidth: 220 + timelineWidth }}>
+        <div ref={timelineRef} style={{ minWidth: LANE_HEADER_WIDTH + timelineWidth }}>
           <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />
 
           {/* Grid lines */}
@@ -200,17 +201,17 @@ export function GanttChart({
             {todayLeft !== null && (
               <div
                 className="today-line"
-                style={{ left: 220 + todayLeft, height: "100%" }}
+                style={{ left: LANE_HEADER_WIDTH + todayLeft, height: "100%" }}
               />
             )}
             <div
               className="absolute top-0 flex pointer-events-none"
-              style={{ left: 220, width: timelineWidth, height: "100%" }}
+              style={{ left: LANE_HEADER_WIDTH, width: timelineWidth, height: "100%" }}
             >
               {columns.map((col) => (
                 <div
                   key={col.key}
-                  className="border-r border-dashed border-border/30 h-full shrink-0"
+                  className="border-r border-dashed border-border/25 h-full shrink-0"
                   style={{ width: col.width }}
                 />
               ))}
@@ -218,8 +219,12 @@ export function GanttChart({
 
             {/* Milestones row */}
             <div
-              className="relative border-b border-border/40 bg-gradient-to-r from-muted/20 to-muted/40"
-              style={{ height: 52, marginLeft: 220, width: timelineWidth }}
+              className="relative border-b border-border/40 bg-slate-50/60"
+              style={{
+                height: MILESTONE_ROW_HEIGHT,
+                marginLeft: LANE_HEADER_WIDTH,
+                width: timelineWidth,
+              }}
             >
               {roadmap.milestones.map((ms) => {
                 const left = getMilestonePosition(

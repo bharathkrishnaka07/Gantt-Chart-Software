@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import type { Milestone as MilestoneType } from "@/types/roadmap";
+import { MILESTONE_ROW_HEIGHT } from "@/lib/gantt/layout";
 
 interface GanttMilestoneProps {
   milestone: MilestoneType;
@@ -20,14 +21,13 @@ export function GanttMilestone({
 }: GanttMilestoneProps) {
   return (
     <motion.div
-      layout
-      className="absolute top-0 flex flex-col items-center group"
-      style={{ left: left - 7, zIndex: 20 }}
-      initial={{ opacity: 0, y: -8 }}
+      className="absolute flex flex-col items-center group"
+      style={{ left: left - 8, top: (MILESTONE_ROW_HEIGHT - 36) / 2, zIndex: 20 }}
+      initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
     >
       <div
-        className={`milestone-diamond shadow-sm ${!isLocked ? "cursor-grab active:cursor-grabbing" : ""}`}
+        className={`h-3.5 w-3.5 milestone-diamond shadow-md ${!isLocked ? "cursor-grab active:cursor-grabbing hover:scale-110 transition-transform" : ""}`}
         style={{ backgroundColor: milestone.color }}
         onClick={(e) => {
           e.stopPropagation();
@@ -38,7 +38,7 @@ export function GanttMilestone({
           onDragStart(e);
         }}
       />
-      <span className="mt-1 text-[10px] font-semibold text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 px-1.5 py-0.5 rounded-md shadow-sm">
+      <span className="mt-1.5 max-w-[120px] truncate text-[11px] font-semibold text-slate-700 text-center px-1">
         {milestone.title}
       </span>
     </motion.div>

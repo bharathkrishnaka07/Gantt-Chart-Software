@@ -14,6 +14,11 @@ import {
   startOfYear,
 } from "date-fns";
 import type { TimelineColumn, ZoomLevel } from "@/types/roadmap";
+import {
+  LANE_HEADER_WIDTH,
+  TIMELINE_HEADER_HEIGHT,
+  COLUMN_WIDTHS,
+} from "@/lib/gantt/layout";
 
 export interface ZoomConfig {
   mode: ZoomLevel;
@@ -24,10 +29,10 @@ export interface ZoomConfig {
 }
 
 export const ZOOM_CONFIGS: Record<ZoomLevel, ZoomConfig> = {
-  week: { mode: "week", columnWidth: 80, headerHeight: 56, rowHeight: 52, laneHeaderWidth: 220 },
-  month: { mode: "month", columnWidth: 140, headerHeight: 56, rowHeight: 52, laneHeaderWidth: 220 },
-  quarter: { mode: "quarter", columnWidth: 100, headerHeight: 56, rowHeight: 52, laneHeaderWidth: 220 },
-  year: { mode: "year", columnWidth: 120, headerHeight: 56, rowHeight: 52, laneHeaderWidth: 220 },
+  week: { mode: "week", columnWidth: COLUMN_WIDTHS.week, headerHeight: TIMELINE_HEADER_HEIGHT, rowHeight: 52, laneHeaderWidth: LANE_HEADER_WIDTH },
+  month: { mode: "month", columnWidth: COLUMN_WIDTHS.month, headerHeight: TIMELINE_HEADER_HEIGHT, rowHeight: 52, laneHeaderWidth: LANE_HEADER_WIDTH },
+  quarter: { mode: "quarter", columnWidth: COLUMN_WIDTHS.quarter, headerHeight: TIMELINE_HEADER_HEIGHT, rowHeight: 52, laneHeaderWidth: LANE_HEADER_WIDTH },
+  year: { mode: "year", columnWidth: COLUMN_WIDTHS.year, headerHeight: TIMELINE_HEADER_HEIGHT, rowHeight: 52, laneHeaderWidth: LANE_HEADER_WIDTH },
 };
 
 export class GanttEngine {
@@ -177,8 +182,7 @@ export class GanttEngine {
 }
 
 // Re-export constants for backward compatibility
-export const LANE_HEADER_WIDTH = 220;
-export const TIMELINE_HEADER_HEIGHT = 56;
+export { LANE_HEADER_WIDTH, TIMELINE_HEADER_HEIGHT } from "@/lib/gantt/layout";
 
 export function buildTimelineColumns(start: Date, end: Date, zoom: ZoomLevel) {
   return GanttEngine.buildColumns(start, end, zoom);

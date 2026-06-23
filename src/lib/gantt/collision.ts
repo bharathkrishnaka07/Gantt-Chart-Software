@@ -1,10 +1,19 @@
 import type { RoadmapTask } from "@/types/roadmap";
+import {
+  TASK_ROW_HEIGHT,
+  TASK_ROW_GAP,
+  LANE_PADDING_Y,
+  LANE_MIN_HEIGHT,
+  MIN_TASK_WIDTH,
+} from "@/lib/gantt/layout";
 
-export const TASK_ROW_HEIGHT = 36;
-export const TASK_ROW_GAP = 6;
-export const LANE_PADDING_Y = 10;
-export const LANE_MIN_HEIGHT = 56;
-export const MIN_TASK_WIDTH = 28;
+export {
+  TASK_ROW_HEIGHT,
+  TASK_ROW_GAP,
+  LANE_PADDING_Y,
+  LANE_MIN_HEIGHT,
+  MIN_TASK_WIDTH,
+} from "@/lib/gantt/layout";
 
 export interface TaskRowLayout {
   taskId: string;

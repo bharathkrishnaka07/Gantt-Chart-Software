@@ -39,11 +39,11 @@ export default function RoadmapPage() {
   }
 
   return (
-    <div className="mesh-bg min-h-full">
-      <div className="max-w-[100vw] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+    <div className="mesh-bg min-h-full flex flex-col">
+      <div className="flex-1 w-full mx-auto px-2 sm:px-4 lg:px-5 py-3 sm:py-4 space-y-3 min-h-0">
         <GanttToolbar roadmap={roadmap} />
 
-        <div className={`${mobileTimelineView ? "block" : "hidden md:block"}`}>
+        <div className={`flex-1 min-h-0 ${mobileTimelineView ? "block" : "hidden md:block"}`}>
           <GanttChart roadmap={roadmap} />
         </div>
 
