@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  roadmaps  Roadmap[]
+}
+
+model Roadmap {
+  id          String           @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  isLocked    Boolean          @default(false)
+  isTemplate  Boolean          @default(false)
+  templateKey String?
+  zoomLevel   String           @default("month")
+  userId      String?
+  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  swimLanes   SwimLane[]
+  tasks       Task[]
+  milestones  Milestone[]
+  versions    RoadmapVersion[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId])
+}
+
+model SwimLane {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#2563EB")
+  order     Int      @default(0)
+  collapsed Boolean  @default(false)
+  roadmapId String
+  roadmap   Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roadmapId])
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  color       String       @default("#2563EB")
+  icon        String?
+  notes       String?
+  tags        String[]     @default([])
+  links       Json         @default("[]")
+  priority    String       @default("medium")
+  status      String       @default("todo")
+  laneId      String
+  swimLane    SwimLane     @relation(fields: [laneId], references: [id], onDelete: Cascade)
+  roadmapId   String
+  roadmap     Roadmap      @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  taskNotes   TaskNote[]
+  attachments Attachment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([roadmapId])
+  @@index([laneId])
+}
+
+model Milestone {
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime
+  color     String   @default("#14B8A6")
+  notes     String?
+  roadmapId String
+  roadmap   Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roadmapId])
+}
+
+model TaskNote {
+  id        String   @id @default(cuid())
+  content   String
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  type      String
+  size      Int?
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+}
+
+model RoadmapVersion {
+  id        String   @id @default(cuid())
+  label     String
+  snapshot  Json
+  roadmapId String
+  roadmap   Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([roadmapId])
+}
