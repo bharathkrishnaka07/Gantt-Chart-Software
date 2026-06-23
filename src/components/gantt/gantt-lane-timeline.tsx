@@ -24,6 +24,7 @@ interface GanttLaneTimelineProps {
   ) => void;
   onLaneDragOver: (laneId: string) => void;
   isDragTarget: boolean;
+  presentationMode?: boolean;
 }
 
 export function GanttLaneTimeline({
@@ -39,6 +40,7 @@ export function GanttLaneTimeline({
   onDragStart,
   onLaneDragOver,
   isDragTarget,
+  presentationMode = false,
 }: GanttLaneTimelineProps) {
   const laneTasks = useMemo(
     () => tasks.filter((t) => t.laneId === lane.id),
@@ -94,6 +96,7 @@ export function GanttLaneTimeline({
                 isSelected={selectedTaskId === task.id}
                 onSelect={() => onSelectTask(task.id)}
                 onDragStart={(e, mode) => onDragStart(task.id, e, mode)}
+                presentationMode={presentationMode}
               />
             );
           })}

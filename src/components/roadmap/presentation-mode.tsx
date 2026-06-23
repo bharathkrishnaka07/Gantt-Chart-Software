@@ -54,10 +54,14 @@ export function PresentationMode({ roadmap }: PresentationModeProps) {
         setPresentationMode(false);
       }
       if (e.key === "ArrowRight") {
-        document.querySelector(".gantt-scroll")?.scrollBy({ left: 240, behavior: "smooth" });
+        document
+          .getElementById("gantt-body-scroll")
+          ?.scrollBy({ left: 240, behavior: "smooth" });
       }
       if (e.key === "ArrowLeft") {
-        document.querySelector(".gantt-scroll")?.scrollBy({ left: -240, behavior: "smooth" });
+        document
+          .getElementById("gantt-body-scroll")
+          ?.scrollBy({ left: -240, behavior: "smooth" });
       }
     };
 
@@ -111,7 +115,7 @@ export function PresentationMode({ roadmap }: PresentationModeProps) {
         </Button>
       </div>
 
-      <div className="flex-1 min-h-0 px-4 sm:px-8 py-4 overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col px-3 sm:px-6 py-3">
         <GanttChart roadmap={roadmap} readOnly presentationMode />
       </div>
 

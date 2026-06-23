@@ -8,6 +8,7 @@ import {
   MIN_TASK_WIDTH,
   TASK_ROW_HEIGHT,
 } from "@/lib/gantt/collision";
+import { estimateTaskLabelWidth } from "@/lib/gantt/layout";
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +27,7 @@ interface GanttTaskBarProps {
   isSelected: boolean;
   onSelect: () => void;
   onDragStart: (e: React.PointerEvent, mode: "move" | "resize-start" | "resize-end") => void;
+  presentationMode?: boolean;
 }
 
 export function GanttTaskBar({
@@ -39,11 +41,14 @@ export function GanttTaskBar({
   isSelected,
   onSelect,
   onDragStart,
+  presentationMode = false,
 }: GanttTaskBarProps) {
   const isDone = task.status === "done";
   const accent = getTaskBorderAccent(task.color ?? laneColor ?? "#2563EB");
   const background = getTaskBackground(laneColor ?? task.color ?? "#2563EB");
-  const barWidth = Math.max(width, MIN_TASK_WIDTH);
+  const barWidth = presentationMode
+    ? Math.max(width, MIN_TASK_WIDTH, estimateTaskLabelWidth(task.title))
+    : Math.max(width, MIN_TASK_WIDTH);
 
   const bar = (
     <motion.div
@@ -101,9 +106,18 @@ export function GanttTaskBar({
       {task.priority === "high" && !isDone && (
         <span className="ml-1 h-2 w-2 rounded-full shrink-0" style={{ background: accent }} />
       )}
-      <span className="truncate ml-1 pr-1">{task.title}</span>
+      <span
+        className={cn(
+          "ml-1 pr-1",
+          presentationMode ? "whitespace-nowrap" : "truncate"
+        )}
+      >
+        {task.title}
+      </span>
     </motion.div>
   );
+
+  if (presentationMode) return bar;
 
   return (
     <Tooltip delayDuration={400}>

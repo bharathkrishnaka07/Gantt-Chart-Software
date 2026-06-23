@@ -18,6 +18,14 @@ export const COLUMN_WIDTHS = {
   year: 140,
 } as const;
 
+/** Extra space at timeline edges so task bars aren't clipped when scrolling */
+export const TIMELINE_EDGE_PADDING = 96;
+
+/** Rough px width for task title at text-sm — used in presentation mode */
+export function estimateTaskLabelWidth(title: string): number {
+  return Math.ceil(title.length * 7.5) + 44;
+}
+
 /** Minimum row height for lane label (single-line header + optional 2nd line) */
 export function estimateLaneLabelHeight(laneName: string): number {
   const usableWidth = LANE_HEADER_WIDTH - 108;

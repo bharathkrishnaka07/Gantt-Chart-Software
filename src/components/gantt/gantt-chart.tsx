@@ -14,7 +14,7 @@ import {
   clampDate,
   toISODate,
 } from "@/lib/timeline";
-import { LANE_HEADER_WIDTH, MILESTONE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, getLaneRowHeight } from "@/lib/gantt/layout";
+import { LANE_HEADER_WIDTH, MILESTONE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, getLaneRowHeight, TIMELINE_EDGE_PADDING } from "@/lib/gantt/layout";
 import { layoutTasksInLane } from "@/lib/gantt/collision";
 import { GanttTimelineHeader } from "./gantt-timeline-header";
 import {
@@ -156,7 +156,7 @@ export function GanttChart({
       const scrollLeft = scrollRef.current?.scrollLeft ?? 0;
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = e.clientX - rect.left + scrollLeft;
+      const x = e.clientX - rect.left + scrollLeft - TIMELINE_EDGE_PADDING;
       const date = pixelToDate(x, columns, timelineStart, timelineEnd);
       updateMilestone(roadmap.id, milestoneDrag.id, {
         date: toISODate(clampDate(snapToDay(date), timelineStart, timelineEnd)),
@@ -177,12 +177,13 @@ export function GanttChart({
 
   const laneRows = useMemo(() => {
     return sortedLanes.map((lane, index) => {
+      const displayLane = presentationMode ? { ...lane, collapsed: false } : lane;
       const laneTasks = roadmap.tasks.filter((t) => t.laneId === lane.id);
       const { contentHeight } = layoutTasksInLane(laneTasks, getRect);
-      const rowHeight = getLaneRowHeight(lane.name, contentHeight, lane.collapsed);
-      return { lane, index, contentHeight, rowHeight };
+      const rowHeight = getLaneRowHeight(displayLane.name, contentHeight, displayLane.collapsed);
+      return { lane: displayLane, index, contentHeight, rowHeight };
     });
-  }, [sortedLanes, roadmap.tasks, getRect]);
+  }, [sortedLanes, roadmap.tasks, getRect, presentationMode]);
 
   const syncVerticalScroll = (source: "lane" | "body") => {
     if (syncingScroll.current) return;
@@ -210,7 +211,29 @@ export function GanttChart({
       ? getMilestonePosition(new Date(), columns, timelineStart, timelineEnd)
       : null;
 
-  const canvasHeight = presentationMode ? "calc(100vh - 132px)" : "calc(100vh - 168px)";
+  const canvasHeight = presentationMode ? "100%" : "calc(100vh - 168px)";
+  const scrollContentWidth = timelineWidth + TIMELINE_EDGE_PADDING * 2;
+
+  // Scroll timeline to "today" when entering presentation
+  useEffect(() => {
+    if (!presentationMode || !scrollRef.current) return;
+
+    const scrollToToday = () => {
+      const el = scrollRef.current;
+      if (!el) return;
+      if (todayLeft !== null) {
+        el.scrollLeft = Math.max(
+          0,
+          TIMELINE_EDGE_PADDING + todayLeft - el.clientWidth * 0.2
+        );
+      }
+      el.scrollTop = 0;
+    };
+
+    requestAnimationFrame(scrollToToday);
+    const t = window.setTimeout(scrollToToday, 150);
+    return () => window.clearTimeout(t);
+  }, [presentationMode, todayLeft, timelineWidth, laneRows.length]);
 
   const bodyHeight =
     MILESTONE_ROW_HEIGHT + laneRows.reduce((sum, row) => sum + row.rowHeight, 0);
@@ -236,7 +259,9 @@ export function GanttChart({
 
   return (
     <div
-      className="relative surface-card overflow-hidden border-border/60 flex flex-col"
+      className={`relative surface-card border-border/60 flex flex-col min-h-0 ${
+        presentationMode ? "h-full flex-1" : "overflow-hidden"
+      }`}
       style={{
         height: canvasHeight,
         ["--timeline-header-height" as string]: `${TIMELINE_HEADER_HEIGHT}px`,
@@ -247,7 +272,16 @@ export function GanttChart({
       <div className="flex shrink-0 border-b border-border/60 bg-white shadow-sm z-30">
         <GanttLaneHeaderCorner />
         <div ref={headerScrollRef} className="flex-1 overflow-hidden">
-          <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />
+          <div
+            style={{
+              width: scrollContentWidth,
+              minWidth: scrollContentWidth,
+              paddingLeft: TIMELINE_EDGE_PADDING,
+              paddingRight: TIMELINE_EDGE_PADDING,
+            }}
+          >
+            <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />
+          </div>
         </div>
       </div>
 
@@ -281,14 +315,25 @@ export function GanttChart({
         {/* Timeline body — horizontal + vertical scroll */}
         <div
           ref={scrollRef}
+          id="gantt-body-scroll"
           className="gantt-scroll flex-1 overflow-auto bg-white/40 min-w-0"
           onScroll={() => {
             syncVerticalScroll("body");
             syncHorizontalScroll();
           }}
         >
-          <div ref={timelineRef} style={{ width: timelineWidth, minWidth: timelineWidth }}>
-            <div className="relative" style={{ minHeight: bodyHeight }}>
+          <div
+            ref={timelineRef}
+            style={{ width: scrollContentWidth, minWidth: scrollContentWidth }}
+          >
+            <div
+              className="relative"
+              style={{
+                minHeight: bodyHeight,
+                paddingLeft: TIMELINE_EDGE_PADDING,
+                paddingRight: TIMELINE_EDGE_PADDING,
+              }}
+            >
               {todayLeft !== null && (
                 <div className="today-line" style={{ left: todayLeft, height: bodyHeight }} />
               )}
@@ -351,6 +396,7 @@ export function GanttChart({
                   onDragStart={handleDragStart}
                   onLaneDragOver={setDragTargetLane}
                   isDragTarget={dragTargetLane === lane.id}
+                  presentationMode={presentationMode}
                 />
               ))}
             </div>
