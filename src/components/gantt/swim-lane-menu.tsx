@@ -141,7 +141,7 @@ export function SwimLaneMenu({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteSwimLane(roadmapId, lane.id)}
-              className="bg-danger hover:opacity-90"
+              className="bg-[var(--color-danger)] text-white hover:opacity-90"
             >
               Delete Lane
             </AlertDialogAction>

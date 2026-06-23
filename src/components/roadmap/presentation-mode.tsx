@@ -2,15 +2,36 @@
 
 import { useEffect } from "react";
 import { motion } from "motion/react";
-import { X } from "lucide-react";
+import { X, Monitor } from "lucide-react";
 import type { Roadmap } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { GanttChart } from "@/components/gantt/gantt-chart";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatDateRange } from "@/lib/utils";
 
 interface PresentationModeProps {
   roadmap: Roadmap;
+}
+
+async function enterFullscreen() {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch {
+    /* overlay still works without native fullscreen */
+  }
+}
+
+async function exitFullscreen() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+  } catch {
+    /* ignore */
+  }
 }
 
 export function PresentationMode({ roadmap }: PresentationModeProps) {
@@ -19,21 +40,41 @@ export function PresentationMode({ roadmap }: PresentationModeProps) {
   useEffect(() => {
     if (!presentationMode) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    void enterFullscreen();
+
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) {
         setPresentationMode(false);
-      }
-      if (e.key === "ArrowRight") {
-        document.querySelector(".gantt-scroll")?.scrollBy({ left: 200, behavior: "smooth" });
-      }
-      if (e.key === "ArrowLeft") {
-        document.querySelector(".gantt-scroll")?.scrollBy({ left: -200, behavior: "smooth" });
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        void exitFullscreen();
+        setPresentationMode(false);
+      }
+      if (e.key === "ArrowRight") {
+        document.querySelector(".gantt-scroll")?.scrollBy({ left: 240, behavior: "smooth" });
+      }
+      if (e.key === "ArrowLeft") {
+        document.querySelector(".gantt-scroll")?.scrollBy({ left: -240, behavior: "smooth" });
+      }
+    };
+
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      window.removeEventListener("keydown", onKeyDown);
+      void exitFullscreen();
+    };
   }, [presentationMode, setPresentationMode]);
+
+  const handleExit = async () => {
+    await exitFullscreen();
+    setPresentationMode(false);
+  };
 
   if (!presentationMode) return null;
 
@@ -42,37 +83,40 @@ export function PresentationMode({ roadmap }: PresentationModeProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="presentation-mode flex flex-col p-6 md:p-10"
+      className="presentation-mode flex flex-col bg-[#f0f2f5]"
     >
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex-1 text-center">
-          <motion.h1
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="text-3xl md:text-4xl font-bold tracking-tight"
-          >
-            {roadmap.title}
-          </motion.h1>
-          <p className="text-muted-foreground mt-2">
+      <div className="flex items-center justify-between gap-4 px-6 sm:px-10 py-4 border-b border-border/60 bg-white/90 backdrop-blur-md shrink-0">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="outline" className="text-[10px] bg-white">
+              <Monitor className="h-3 w-3 mr-1" />
+              Presentation
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              {new Date().toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight truncate">{roadmap.title}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {formatDateRange(new Date(roadmap.startDate), new Date(roadmap.endDate))}
           </p>
         </div>
-        <Button
-          variant="secondary"
-          size="icon"
-          className="shrink-0 clay-glass"
-          onClick={() => setPresentationMode(false)}
-        >
+        <Button variant="outline" size="sm" className="bg-white shrink-0" onClick={() => void handleExit()}>
           <X className="h-4 w-4" />
+          Exit
         </Button>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <GanttChart roadmap={roadmap} readOnly />
+      <div className="flex-1 min-h-0 px-4 sm:px-8 py-4 overflow-hidden">
+        <GanttChart roadmap={roadmap} readOnly presentationMode />
       </div>
 
-      <p className="text-center text-xs text-muted-foreground mt-4">
-        ← → Navigate timeline · Esc to exit
+      <p className="text-center text-xs text-muted-foreground py-3 shrink-0 bg-white/80 border-t border-border/40">
+        ← → scroll timeline · Esc or Exit to leave fullscreen
       </p>
     </motion.div>
   );

@@ -150,7 +150,7 @@ export function RoadmapCard({ roadmap, isActive }: RoadmapCardProps) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => { deleteRoadmap(roadmap.id); router.push("/"); }}
-              className="bg-danger hover:opacity-90"
+              className="bg-[var(--color-danger)] text-white hover:opacity-90"
             >
               Delete
             </AlertDialogAction>

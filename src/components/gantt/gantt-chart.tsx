@@ -23,6 +23,7 @@ import { GanttMilestone } from "./gantt-milestone";
 interface GanttChartProps {
   roadmap: Roadmap;
   readOnly?: boolean;
+  presentationMode?: boolean;
 }
 
 interface DragState {
@@ -35,7 +36,11 @@ interface DragState {
   currentLaneId: string;
 }
 
-export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
+export function GanttChart({
+  roadmap,
+  readOnly = false,
+  presentationMode = false,
+}: GanttChartProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
@@ -180,7 +185,12 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
       <div
         ref={scrollRef}
         className="gantt-scroll overflow-auto"
-        style={{ maxHeight: "calc(100vh - 200px)" }}
+        style={{
+          maxHeight: presentationMode
+            ? "calc(100vh - 140px)"
+            : "calc(100vh - 200px)",
+          height: presentationMode ? "calc(100vh - 140px)" : undefined,
+        }}
       >
         <div ref={timelineRef} style={{ minWidth: 220 + timelineWidth }}>
           <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />

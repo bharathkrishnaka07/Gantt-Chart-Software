@@ -178,7 +178,7 @@ export function RoadmapSettingsDialog({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-danger hover:opacity-90"
+              className="bg-[var(--color-danger)] text-white hover:opacity-90"
             >
               Delete Forever
             </AlertDialogAction>

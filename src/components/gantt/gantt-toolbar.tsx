@@ -289,7 +289,7 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-danger hover:opacity-90">
+            <AlertDialogAction onClick={handleDelete} className="bg-[var(--color-danger)] text-white hover:opacity-90">
               Delete Forever
             </AlertDialogAction>
           </AlertDialogFooter>

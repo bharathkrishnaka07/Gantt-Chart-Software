@@ -15,7 +15,7 @@ export function SyncIndicator({ status, compact }: SyncIndicatorProps) {
     idle: { icon: Cloud, label: "Saved to cloud", className: "text-muted-foreground" },
     syncing: { icon: Loader2, label: "Saving…", className: "text-primary" },
     saved: { icon: Check, label: "Saved", className: "text-success" },
-    error: { icon: CloudOff, label: "Save failed", className: "text-danger" },
+    error: { icon: CloudOff, label: "Save failed", className: "text-[var(--color-danger)]" },
   }[status];
 
   const Icon = config.icon;
