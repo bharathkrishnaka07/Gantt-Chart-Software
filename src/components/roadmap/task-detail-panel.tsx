@@ -37,9 +37,9 @@ export function TaskDetailPanel({ roadmap }: TaskDetailPanelProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 400, damping: 35 }}
-            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md clay-card rounded-none border-l border-border shadow-2xl overflow-y-auto"
+            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md surface-card rounded-none border-l border-border/60 shadow-2xl overflow-y-auto"
           >
-            <div className="sticky top-0 clay-glass border-b border-border p-4 flex items-center justify-between">
+            <div className="sticky top-0 glass-bar border-b border-border/60 p-4 flex items-center justify-between">
               <h2 className="font-semibold text-lg truncate">{task.title}</h2>
               <Button variant="ghost" size="icon" onClick={() => setSelectedTaskId(null)}>
                 <X className="h-4 w-4" />

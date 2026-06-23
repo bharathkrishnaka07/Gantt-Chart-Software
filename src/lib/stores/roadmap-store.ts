@@ -15,7 +15,7 @@ import {
   createBlankRoadmap,
   TEMPLATES,
 } from "@/lib/templates";
-import { fetchAppState, pushAppState, scheduleSyncToServer } from "@/lib/sync-client";
+import { fetchAppState, scheduleSyncToServer, forceSyncToServer, type SyncStatus } from "@/lib/sync-client";
 
 interface RoadmapStore {
   roadmaps: Roadmap[];
@@ -28,8 +28,11 @@ interface RoadmapStore {
   recentActivity: ActivityEntry[];
   isLoading: boolean;
   isHydrated: boolean;
+  syncStatus: SyncStatus;
+  loadError: string | null;
 
   loadFromServer: () => Promise<void>;
+  setSyncStatus: (status: SyncStatus) => void;
   getActiveRoadmap: () => Roadmap | null;
   setActiveRoadmap: (id: string) => void;
   createRoadmap: (title?: string) => Roadmap;
@@ -106,9 +109,9 @@ function getSyncPayload(state: RoadmapStore) {
   };
 }
 
-function triggerSync(get: () => RoadmapStore) {
+function triggerSync(get: () => RoadmapStore, immediate = false) {
   if (!get().isHydrated) return;
-  scheduleSyncToServer(() => getSyncPayload(get()));
+  scheduleSyncToServer(() => getSyncPayload(get()), immediate);
 }
 
 export const useRoadmapStore = create<RoadmapStore>()((set, get) => ({
@@ -122,9 +125,13 @@ export const useRoadmapStore = create<RoadmapStore>()((set, get) => ({
   recentActivity: [],
   isLoading: true,
   isHydrated: false,
+  syncStatus: "idle" as SyncStatus,
+  loadError: null,
+
+  setSyncStatus: (status) => set({ syncStatus: status }),
 
   loadFromServer: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, loadError: null });
     const data = await fetchAppState();
 
     if (data && data.roadmaps.length > 0) {
@@ -135,27 +142,42 @@ export const useRoadmapStore = create<RoadmapStore>()((set, get) => ({
         recentActivity: data.recentActivity,
         isLoading: false,
         isHydrated: true,
+        syncStatus: "saved",
       });
       return;
     }
 
-    const defaultRoadmap = createPMCareerRoadmap();
-    defaultRoadmap.isTemplate = false;
-    const initial = {
-      roadmaps: [defaultRoadmap],
-      activeRoadmapId: defaultRoadmap.id,
-      recentActivity: [
-        {
-          id: generateId(),
-          action: "Created roadmap",
-          timestamp: new Date().toISOString(),
-          details: defaultRoadmap.title,
-        },
-      ] as ActivityEntry[],
-    };
+    if (data && data.roadmaps.length === 0) {
+      const defaultRoadmap = createPMCareerRoadmap();
+      defaultRoadmap.isTemplate = false;
+      const initial = {
+        roadmaps: [defaultRoadmap],
+        activeRoadmapId: defaultRoadmap.id,
+        recentActivity: [
+          {
+            id: generateId(),
+            action: "Created roadmap",
+            timestamp: new Date().toISOString(),
+            details: defaultRoadmap.title,
+          },
+        ] as ActivityEntry[],
+      };
+      set({ ...initial, isLoading: false, isHydrated: true, syncStatus: "syncing" });
+      const ok = await forceSyncToServer(() => ({
+        ...getSyncPayload(get()),
+        ...initial,
+      }));
+      if (!ok) {
+        set({ loadError: "Could not save to database. Check DATABASE_URL is configured." });
+      }
+      return;
+    }
 
-    set({ ...initial, isLoading: false, isHydrated: true });
-    await pushAppState({ ...initial, versions: [] });
+    set({
+      loadError: "Could not connect to database. Check DATABASE_URL on Vercel.",
+      isLoading: false,
+      isHydrated: true,
+    });
   },
 
   getActiveRoadmap: () => {
@@ -226,7 +248,7 @@ export const useRoadmapStore = create<RoadmapStore>()((set, get) => ({
       };
     });
     logActivity(get, set, "Deleted roadmap");
-    triggerSync(get);
+    triggerSync(get, true);
   },
 
   toggleLock: (id) => {

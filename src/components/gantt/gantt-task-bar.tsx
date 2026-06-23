@@ -23,22 +23,23 @@ export function GanttTaskBar({
   onSelect,
   onDragStart,
 }: GanttTaskBarProps) {
-  const statusOpacity = task.status === "done" ? 0.6 : 1;
+  const isDone = task.status === "done";
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: statusOpacity, scale: 1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      initial={{ opacity: 0, scaleX: 0.8 }}
+      animate={{ opacity: isDone ? 0.65 : 1, scaleX: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 32 }}
       className={cn(
-        "task-bar absolute top-2 flex h-10 items-center rounded-lg px-3 text-xs font-medium text-white shadow-md select-none",
+        "task-bar absolute top-3 flex h-9 items-center gap-1.5 px-2.5 text-[11px] font-semibold text-white select-none",
         !isLocked && "cursor-grab active:cursor-grabbing",
-        isSelected && "ring-2 ring-white ring-offset-1 ring-offset-transparent"
+        isSelected && "ring-2 ring-white/80 ring-offset-1 ring-offset-transparent z-10",
+        isDone && "line-through decoration-white/50"
       )}
       style={{
         left,
-        width: Math.max(width, 24),
+        width: Math.max(width, 28),
         backgroundColor: task.color,
       }}
       onClick={(e) => {
@@ -55,24 +56,18 @@ export function GanttTaskBar({
         <>
           <div
             className="task-bar-resize-handle left"
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              onDragStart(e, "resize-start");
-            }}
+            onPointerDown={(e) => { e.stopPropagation(); onDragStart(e, "resize-start"); }}
           />
           <div
             className="task-bar-resize-handle right"
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              onDragStart(e, "resize-end");
-            }}
+            onPointerDown={(e) => { e.stopPropagation(); onDragStart(e, "resize-end"); }}
           />
         </>
       )}
-      <span className="truncate">{task.title}</span>
-      {task.status === "done" && (
-        <span className="ml-auto text-[10px] opacity-80">✓</span>
+      {task.priority === "high" && (
+        <span className="h-1.5 w-1.5 rounded-full bg-white/80 shrink-0" />
       )}
+      <span className="truncate">{task.title}</span>
     </motion.div>
   );
 }

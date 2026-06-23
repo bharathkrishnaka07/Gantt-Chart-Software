@@ -1,26 +1,47 @@
 "use client";
 
 import { useEffect } from "react";
+import { Toaster, toast } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppShell } from "@/components/layout/app-shell";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
+import { setSyncStatusListener } from "@/lib/sync-client";
+import { DashboardSkeleton } from "@/components/layout/loading-skeleton";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const loadFromServer = useRoadmapStore((s) => s.loadFromServer);
   const isLoading = useRoadmapStore((s) => s.isLoading);
+  const loadError = useRoadmapStore((s) => s.loadError);
+  const setSyncStatus = useRoadmapStore((s) => s.setSyncStatus);
 
   useEffect(() => {
     loadFromServer();
   }, [loadFromServer]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-3">
-          <div className="h-10 w-10 rounded-xl clay-button mx-auto animate-pulse" />
-          <p className="text-sm text-muted-foreground">Loading your roadmaps…</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    setSyncStatusListener((status) => {
+      setSyncStatus(status);
+      if (status === "error") {
+        toast.error("Failed to save to database. Retrying…");
+      }
+    });
+    return () => setSyncStatusListener(null);
+  }, [setSyncStatus]);
 
-  return <>{children}</>;
+  useEffect(() => {
+    if (loadError) {
+      toast.error(loadError);
+    }
+  }, [loadError]);
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Toaster position="bottom-right" richColors closeButton />
+      {isLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <AppShell>{children}</AppShell>
+      )}
+    </TooltipProvider>
+  );
 }

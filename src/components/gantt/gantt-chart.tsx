@@ -168,20 +168,31 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
 
   const sortedLanes = [...roadmap.swimLanes].sort((a, b) => a.order - b.order);
   const totalHeight =
-    sortedLanes.reduce((h, l) => h + (l.collapsed ? 40 : LANE_HEIGHT), 0) + TIMELINE_HEADER_HEIGHT + 48;
+    sortedLanes.reduce((h, l) => h + (l.collapsed ? 40 : LANE_HEIGHT), 0) + TIMELINE_HEADER_HEIGHT + 52;
+
+  const todayLeft =
+    new Date() >= timelineStart && new Date() <= timelineEnd
+      ? getMilestonePosition(new Date(), columns, timelineStart, timelineEnd)
+      : null;
 
   return (
-    <div className="relative rounded-2xl border border-border/60 bg-white overflow-hidden shadow-sm">
+    <div className="relative surface-card overflow-hidden">
       <div
         ref={scrollRef}
         className="gantt-scroll overflow-auto"
-        style={{ maxHeight: "calc(100vh - 220px)" }}
+        style={{ maxHeight: "calc(100vh - 200px)" }}
       >
         <div ref={timelineRef} style={{ minWidth: 220 + timelineWidth }}>
           <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />
 
           {/* Grid lines */}
           <div className="relative" style={{ height: totalHeight - TIMELINE_HEADER_HEIGHT }}>
+            {todayLeft !== null && (
+              <div
+                className="today-line"
+                style={{ left: 220 + todayLeft, height: "100%" }}
+              />
+            )}
             <div
               className="absolute top-0 flex pointer-events-none"
               style={{ left: 220, width: timelineWidth, height: "100%" }}
@@ -197,8 +208,8 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
 
             {/* Milestones row */}
             <div
-              className="relative border-b border-border/40 bg-muted/30"
-              style={{ height: 48, marginLeft: 220, width: timelineWidth }}
+              className="relative border-b border-border/40 bg-gradient-to-r from-muted/20 to-muted/40"
+              style={{ height: 52, marginLeft: 220, width: timelineWidth }}
             >
               {roadmap.milestones.map((ms) => {
                 const left = getMilestonePosition(
@@ -275,7 +286,7 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-4 right-4 clay-glass rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-lg"
+          className="absolute bottom-4 right-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-lg"
         >
           🔒 Roadmap Locked
         </motion.div>

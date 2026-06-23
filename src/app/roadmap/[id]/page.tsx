@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { GanttChart } from "@/components/gantt/gantt-chart";
@@ -9,37 +9,44 @@ import { TaskDetailPanel } from "@/components/roadmap/task-detail-panel";
 import { PresentationMode } from "@/components/roadmap/presentation-mode";
 import { MobileRoadmapView } from "@/components/roadmap/mobile-roadmap-view";
 import { MilestoneDetailPanel } from "@/components/roadmap/milestone-detail-panel";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function RoadmapPage() {
   const params = useParams();
   const id = params.id as string;
   const { roadmaps, setActiveRoadmap, mobileTimelineView } = useRoadmapStore();
+  const [mounted, setMounted] = useState(false);
 
   const roadmap = roadmaps.find((r) => r.id === id);
 
   useEffect(() => {
+    setMounted(true);
     if (id) setActiveRoadmap(id);
   }, [id, setActiveRoadmap]);
 
+  if (!mounted) return null;
+
   if (!roadmap) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <p className="text-muted-foreground">Roadmap not found</p>
+        <Button asChild>
+          <Link href="/">Back to Dashboard</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-[100vw] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="mesh-bg min-h-full">
+      <div className="max-w-[100vw] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
         <GanttToolbar roadmap={roadmap} />
 
-        {/* Desktop Gantt */}
         <div className={`${mobileTimelineView ? "block" : "hidden md:block"}`}>
           <GanttChart roadmap={roadmap} />
         </div>
 
-        {/* Mobile card view */}
         {!mobileTimelineView && <MobileRoadmapView roadmap={roadmap} />}
 
         <TaskDetailPanel roadmap={roadmap} />

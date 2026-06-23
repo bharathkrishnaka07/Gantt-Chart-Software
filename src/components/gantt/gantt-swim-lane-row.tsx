@@ -52,15 +52,15 @@ export function GanttSwimLaneRow({
   return (
     <div
       className={cn(
-        "flex border-b border-border/60 transition-colors",
-        isDragTarget && "bg-primary/5"
+        "lane-row flex border-b border-border/40 transition-colors",
+        isDragTarget && "bg-primary/[0.04]"
       )}
       style={{ minHeight: lane.collapsed ? 40 : LANE_HEIGHT }}
       onPointerEnter={() => onLaneDragOver(lane.id)}
     >
       {/* Sticky lane label */}
       <div
-        className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r border-border/60 bg-white/95 backdrop-blur-sm px-3"
+        className="sticky left-0 z-20 flex shrink-0 items-center gap-1.5 border-r border-border/40 bg-white/95 backdrop-blur-md px-2.5"
         style={{ width: 220 }}
       >
         <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />

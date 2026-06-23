@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import type { Roadmap, ZoomLevel } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { SyncIndicator } from "@/components/layout/sync-indicator";
 import {
   Dialog,
   DialogContent,
@@ -69,6 +71,7 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
     duplicateRoadmapById,
     deleteRoadmap,
     updateRoadmap,
+    syncStatus,
   } = useRoadmapStore();
 
   const [unlockDialog, setUnlockDialog] = useState(false);
@@ -100,50 +103,56 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <Link href="/">
-            <Button variant="ghost" size="icon">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div className="min-w-0">
-            {editingTitle && !roadmap.isLocked ? (
-              <input
-                className="text-xl font-bold tracking-tight bg-transparent border-b-2 border-primary outline-none w-full"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onBlur={handleTitleSave}
-                onKeyDown={(e) => e.key === "Enter" && handleTitleSave()}
-                autoFocus
-              />
-            ) : (
-              <h1
-                className={`text-xl font-bold tracking-tight truncate ${!roadmap.isLocked ? "cursor-pointer hover:text-primary" : ""}`}
-                onClick={() => !roadmap.isLocked && setEditingTitle(true)}
-                title={!roadmap.isLocked ? "Click to rename" : undefined}
-              >
-                {roadmap.title}
-                {roadmap.isLocked && <span className="ml-2 text-base">🔒</span>}
-              </h1>
-            )}
-            <p className="text-sm text-muted-foreground">
-              {new Date(roadmap.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-              {" → "}
-              {new Date(roadmap.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-            </p>
+      <div className="surface-card p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Link href="/">
+              <Button variant="outline" size="icon" className="shrink-0">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="min-w-0">
+              {editingTitle && !roadmap.isLocked ? (
+                <input
+                  className="text-xl font-bold tracking-tight bg-transparent border-b-2 border-primary outline-none w-full"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={(e) => e.key === "Enter" && handleTitleSave()}
+                  autoFocus
+                />
+              ) : (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1
+                    className={`text-xl font-bold tracking-tight truncate ${!roadmap.isLocked ? "cursor-pointer hover:text-primary" : ""}`}
+                    onClick={() => !roadmap.isLocked && setEditingTitle(true)}
+                  >
+                    {roadmap.title}
+                  </h1>
+                  {roadmap.isLocked && <Badge variant="secondary">🔒 Locked</Badge>}
+                </div>
+              )}
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-sm text-muted-foreground">
+                  {new Date(roadmap.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                  {" → "}
+                  {new Date(roadmap.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                </p>
+                <SyncIndicator status={syncStatus} />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
           {/* Zoom — always available */}
-          <div className="flex items-center gap-1 clay-card px-1 py-1 rounded-xl">
-            <ZoomIn className="h-4 w-4 text-muted-foreground ml-2" />
+          <div className="flex items-center gap-0.5 bg-muted/60 rounded-xl p-1">
+            <ZoomIn className="h-3.5 w-3.5 text-muted-foreground ml-2 mr-1" />
             {ZOOM_OPTIONS.map((opt) => (
               <Button
                 key={opt.value}
                 variant={roadmap.zoomLevel === opt.value ? "default" : "ghost"}
                 size="sm"
+                className="h-7 text-xs"
                 onClick={() => setZoomLevel(roadmap.id, opt.value)}
               >
                 {opt.label}
@@ -232,6 +241,7 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
         </div>
       </div>
 
