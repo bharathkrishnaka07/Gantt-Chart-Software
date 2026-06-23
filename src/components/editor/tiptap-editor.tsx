@@ -92,7 +92,9 @@ function ToolbarButton({
     <button
       onClick={onClick}
       className={`px-2 py-1 text-xs rounded-lg transition-colors ${
-        active ? "bg-primary text-white" : "hover:bg-muted text-foreground"
+        active
+          ? "bg-primary/10 text-primary ring-1 ring-primary/25 font-medium"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       {label}

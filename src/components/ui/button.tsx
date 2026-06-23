@@ -8,13 +8,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "clay-button text-white",
+        default:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md active:scale-[0.98]",
         secondary:
           "bg-white text-foreground border border-border shadow-sm hover:bg-muted hover:shadow-md",
-        ghost: "hover:bg-muted text-foreground",
-        outline: "border border-border bg-transparent hover:bg-muted",
-        destructive: "bg-danger text-white hover:opacity-90 shadow-sm",
-        accent: "bg-accent text-white hover:opacity-90 shadow-sm",
+        ghost: "text-foreground hover:bg-muted/80 hover:text-foreground",
+        outline:
+          "border border-border bg-white text-foreground shadow-sm hover:bg-muted hover:border-primary/30",
+        destructive:
+          "bg-[var(--color-danger)] text-white hover:opacity-90 shadow-sm",
+        accent:
+          "bg-accent text-accent-foreground hover:opacity-90 shadow-sm",
+        /** Toggle/segment selected — dark text on light fill, never white-on-white */
+        segmentActive:
+          "bg-white text-primary font-semibold shadow-sm ring-1 ring-primary/30 hover:bg-white",
+        segment:
+          "text-muted-foreground hover:text-foreground hover:bg-white/60",
       },
       size: {
         default: "h-10 px-4 py-2",

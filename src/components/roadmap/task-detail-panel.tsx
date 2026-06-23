@@ -109,7 +109,7 @@ export function TaskDetailPanel({ roadmap }: TaskDetailPanelProps) {
                       {(["low", "medium", "high"] as const).map((priority) => (
                         <Button
                           key={priority}
-                          variant={task.priority === priority ? "default" : "secondary"}
+                          variant={task.priority === priority ? "segmentActive" : "segment"}
                           size="sm"
                           disabled={isLocked}
                           onClick={() => updateTask(roadmap.id, task.id, { priority })}
@@ -141,7 +141,7 @@ export function TaskDetailPanel({ roadmap }: TaskDetailPanelProps) {
                       {(["todo", "in_progress", "done"] as const).map((status) => (
                         <Button
                           key={status}
-                          variant={task.status === status ? "default" : "secondary"}
+                          variant={task.status === status ? "segmentActive" : "segment"}
                           size="sm"
                           disabled={isLocked}
                           onClick={() => updateTask(roadmap.id, task.id, { status })}

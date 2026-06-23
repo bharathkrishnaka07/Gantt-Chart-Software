@@ -47,6 +47,7 @@ import {
 import { useState } from "react";
 import { TimelineSettings } from "./timeline-settings";
 import { RoadmapSettingsDialog } from "@/components/roadmap/roadmap-settings-dialog";
+import { cn } from "@/lib/utils";
 
 const ZOOM_OPTIONS: { value: ZoomLevel; label: string }[] = [
   { value: "year", label: "Year" },
@@ -145,14 +146,17 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
 
           <div className="flex flex-wrap items-center gap-2">
           {/* Zoom — always available */}
-          <div className="flex items-center gap-0.5 bg-muted/60 rounded-xl p-1">
-            <ZoomIn className="h-3.5 w-3.5 text-muted-foreground ml-2 mr-1" />
+          <div className="flex items-center gap-0.5 rounded-xl border border-border/60 bg-muted/50 p-1 shadow-inner">
+            <ZoomIn className="h-3.5 w-3.5 text-muted-foreground ml-2 mr-1 shrink-0" />
             {ZOOM_OPTIONS.map((opt) => (
               <Button
                 key={opt.value}
-                variant={roadmap.zoomLevel === opt.value ? "default" : "ghost"}
+                variant={roadmap.zoomLevel === opt.value ? "segmentActive" : "segment"}
                 size="sm"
-                className="h-7 text-xs"
+                className={cn(
+                  "h-7 min-w-[3.25rem] text-xs rounded-lg",
+                  roadmap.zoomLevel === opt.value && "shadow-sm"
+                )}
                 onClick={() => setZoomLevel(roadmap.id, opt.value)}
               >
                 {opt.label}

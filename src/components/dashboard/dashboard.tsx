@@ -83,13 +83,17 @@ export function Dashboard() {
               )}
             </div>
             <div className="flex flex-wrap gap-2 shrink-0">
-              <Button size="lg" onClick={() => createRoadmap("New Career Roadmap")}>
+              <Button
+                size="lg"
+                className="shadow-md shadow-primary/25"
+                onClick={() => createRoadmap("New Career Roadmap")}
+              >
                 <Plus className="h-4 w-4" />
                 New Roadmap
               </Button>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="lg" variant="outline">
+                  <Button size="lg" variant="outline" className="bg-white">
                     <LayoutTemplate className="h-4 w-4" />
                     Templates
                   </Button>
