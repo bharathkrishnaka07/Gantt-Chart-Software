@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import type { Milestone as MilestoneType } from "@/types/roadmap";
 import { MILESTONE_ROW_HEIGHT } from "@/lib/gantt/layout";
+import { springMicro } from "@/lib/motion/presets";
 
 interface GanttMilestoneProps {
   milestone: MilestoneType;
@@ -23,12 +24,16 @@ export function GanttMilestone({
     <motion.div
       className="absolute flex flex-col items-center group"
       style={{ left: left - 8, top: (MILESTONE_ROW_HEIGHT - 36) / 2, zIndex: 20 }}
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: -8, scale: 0.8 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={springMicro}
     >
-      <div
-        className={`h-3.5 w-3.5 milestone-diamond shadow-md ${!isLocked ? "cursor-grab active:cursor-grabbing hover:scale-110 transition-transform" : ""}`}
+      <motion.div
+        className={`h-3.5 w-3.5 milestone-diamond shadow-md ${!isLocked ? "cursor-grab active:cursor-grabbing" : ""}`}
         style={{ backgroundColor: milestone.color }}
+        whileHover={!isLocked ? { scale: 1.2 } : undefined}
+        whileTap={!isLocked ? { scale: 0.9 } : undefined}
+        transition={springMicro}
         onClick={(e) => {
           e.stopPropagation();
           onSelect();

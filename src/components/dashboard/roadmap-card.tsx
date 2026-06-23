@@ -34,6 +34,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RoadmapSettingsDialog } from "@/components/roadmap/roadmap-settings-dialog";
+import { AnimatedProgress } from "@/components/motion/animated-progress";
+import { TiltCard } from "@/components/motion/tilt-card";
+import { GlowBorder } from "@/components/motion/glow-border";
 import { formatDateRange } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -56,13 +59,15 @@ export function RoadmapCard({ roadmap, isActive }: RoadmapCardProps) {
 
   return (
     <>
-      <div
-        className={cn(
-          "surface-card surface-card-interactive h-full group",
-          isActive && "ring-2 ring-primary/20 border-primary/20"
-        )}
-      >
-        <div className="p-5">
+      <TiltCard intensity={14} className="h-full">
+        <GlowBorder
+          className="h-full opacity-40 group-hover:opacity-100 transition-opacity duration-500"
+          innerClassName={cn(
+            "surface-card h-full group",
+            isActive && "ring-2 ring-primary/25"
+          )}
+        >
+          <div className="p-5 h-full">
           <div className="flex items-start justify-between gap-2 mb-3">
             <Link
               href={`/roadmap/${roadmap.id}`}
@@ -127,14 +132,10 @@ export function RoadmapCard({ roadmap, isActive }: RoadmapCardProps) {
             </Badge>
           </div>
 
-          <div className="h-1 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-            />
+          <AnimatedProgress value={progress} className="h-1.5" delay={0.3} />
           </div>
-        </div>
-      </div>
+        </GlowBorder>
+      </TiltCard>
 
       <RoadmapSettingsDialog roadmap={roadmap} open={settingsOpen} onOpenChange={setSettingsOpen} />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { MotionConfig } from "motion/react";
 import { Toaster, toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppShell } from "@/components/layout/app-shell";
@@ -35,13 +36,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [loadError]);
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <Toaster position="bottom-right" richColors closeButton />
-      {isLoading ? (
-        <DashboardSkeleton />
-      ) : (
-        <AppShell>{children}</AppShell>
-      )}
-    </TooltipProvider>
+    <MotionConfig reducedMotion="user">
+      <TooltipProvider delayDuration={200}>
+        <Toaster position="bottom-right" richColors closeButton />
+        {isLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <AppShell>{children}</AppShell>
+        )}
+      </TooltipProvider>
+    </MotionConfig>
   );
 }

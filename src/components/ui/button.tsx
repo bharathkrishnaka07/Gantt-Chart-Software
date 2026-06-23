@@ -1,6 +1,8 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
+import { motion } from "motion/react";
 import * as React from "react";
+import { springMicro } from "@/lib/motion/presets";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
@@ -40,20 +42,51 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<
+      React.ButtonHTMLAttributes<HTMLButtonElement>,
+      "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart"
+    >,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
+
+    const showShine = variant === "default" || variant === "accent";
+
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <motion.button
+        className={cn(buttonVariants({ variant, size, className }), "relative overflow-hidden")}
         ref={ref}
+        whileHover={{ scale: 1.04, y: -2 }}
+        whileTap={{ scale: 0.94 }}
+        transition={springMicro}
         {...props}
-      />
+      >
+        {showShine && (
+          <motion.span
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-12"
+            initial={{ x: "-150%" }}
+            whileHover={{ x: "150%" }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          />
+        )}
+        <span className="relative z-10 inline-flex items-center justify-center gap-2">
+          {children}
+        </span>
+      </motion.button>
     );
   }
 );

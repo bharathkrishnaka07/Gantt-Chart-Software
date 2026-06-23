@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { SyncIndicator } from "@/components/layout/sync-indicator";
+import { springMicro, springSnappy, pageEnter } from "@/lib/motion/presets";
 import {
   Tooltip,
   TooltipContent,
@@ -69,9 +70,14 @@ export function AppShell({ children }: AppShellProps) {
           className={cn("flex items-center group", collapsed ? "justify-center" : "gap-3")}
           onClick={onNavigate}
         >
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+          <motion.div
+            className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 shrink-0"
+            whileHover={{ scale: 1.08, rotate: 6 }}
+            whileTap={{ scale: 0.94 }}
+            transition={springMicro}
+          >
             <Sparkles className="h-4 w-4 text-white" />
-          </div>
+          </motion.div>
           {!collapsed && (
             <div>
               <p className="font-semibold text-sm tracking-tight group-hover:text-primary transition-colors">
@@ -102,15 +108,22 @@ export function AppShell({ children }: AppShellProps) {
             href="/"
             onClick={onNavigate}
             className={cn(
-              "flex items-center rounded-xl text-sm font-medium transition-all",
+              "relative flex items-center rounded-xl text-sm font-medium transition-colors",
               collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
               isDashboard
-                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                ? "text-primary-foreground shadow-md shadow-primary/25"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            <LayoutDashboard className="h-4 w-4 shrink-0" />
-            {!collapsed && "Dashboard"}
+            {isDashboard && (
+              <motion.div
+                layoutId="sidebar-active"
+                className="absolute inset-0 rounded-xl bg-primary"
+                transition={springSnappy}
+              />
+            )}
+            <LayoutDashboard className="h-4 w-4 shrink-0 relative z-10" />
+            {!collapsed && <span className="relative z-10">Dashboard</span>}
           </Link>
         </SidebarTooltip>
 
@@ -149,39 +162,56 @@ export function AppShell({ children }: AppShellProps) {
               <p className="px-3 py-2 text-xs text-muted-foreground">No roadmaps yet</p>
             )
           ) : (
-            roadmaps.map((roadmap) => {
+            roadmaps.map((roadmap, i) => {
               const isActive = pathname === `/roadmap/${roadmap.id}`;
               const isCurrent = roadmap.id === activeRoadmapId;
               return (
                 <SidebarTooltip key={roadmap.id} label={roadmap.title} collapsed={collapsed}>
-                  <Link
-                    href={`/roadmap/${roadmap.id}`}
-                    onClick={onNavigate}
-                    className={cn(
-                      "flex items-center rounded-lg text-sm transition-all group",
-                      collapsed ? "justify-center p-2.5" : "gap-2 px-3 py-2",
-                      isActive
-                        ? "bg-muted font-medium text-foreground"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                    )}
+                  <motion.div
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ ...springSnappy, delay: i * 0.04 }}
                   >
-                    <Map className={cn("h-3.5 w-3.5 shrink-0", isActive && "text-primary")} />
-                    {!collapsed && (
-                      <>
-                        <span className="truncate flex-1">{roadmap.title}</span>
-                        {roadmap.isLocked && <span className="text-[10px]">🔒</span>}
-                        {isCurrent && !isActive && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-                        )}
-                        <ChevronRight
-                          className={cn(
-                            "h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all",
-                            isActive && "opacity-100 translate-x-0"
-                          )}
+                    <Link
+                      href={`/roadmap/${roadmap.id}`}
+                      onClick={onNavigate}
+                      className={cn(
+                        "relative flex items-center rounded-lg text-sm transition-colors group",
+                        collapsed ? "justify-center p-2.5" : "gap-2 px-3 py-2",
+                        isActive
+                          ? "font-medium text-foreground"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      )}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="sidebar-active"
+                          className="absolute inset-0 rounded-lg bg-muted"
+                          transition={springSnappy}
                         />
-                      </>
-                    )}
-                  </Link>
+                      )}
+                      <Map className={cn("h-3.5 w-3.5 shrink-0 relative z-10", isActive && "text-primary")} />
+                      {!collapsed && (
+                        <>
+                          <span className="truncate flex-1 relative z-10">{roadmap.title}</span>
+                          {roadmap.isLocked && <span className="text-[10px] relative z-10">🔒</span>}
+                          {isCurrent && !isActive && (
+                            <motion.span
+                              className="h-1.5 w-1.5 rounded-full bg-accent shrink-0 relative z-10"
+                              animate={{ scale: [1, 1.3, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            />
+                          )}
+                          <ChevronRight
+                            className={cn(
+                              "h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all relative z-10",
+                              isActive && "opacity-100 translate-x-0"
+                            )}
+                          />
+                        </>
+                      )}
+                    </Link>
+                  </motion.div>
                 </SidebarTooltip>
               );
             })
@@ -273,7 +303,18 @@ export function AppShell({ children }: AppShellProps) {
           <SyncIndicator status={syncStatus} />
         </header>
 
-        <main className="flex-1">{children}</main>
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={pathname}
+            initial={pageEnter.initial}
+            animate={pageEnter.animate}
+            exit={pageEnter.exit}
+            transition={pageEnter.transition}
+            className="flex-1"
+          >
+            {children}
+          </motion.main>
+        </AnimatePresence>
       </div>
     </div>
   );

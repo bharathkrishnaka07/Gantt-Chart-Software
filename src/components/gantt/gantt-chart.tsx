@@ -258,7 +258,10 @@ export function GanttChart({
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97, filter: "blur(8px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ type: "spring", stiffness: 200, damping: 26, mass: 0.8 }}
       className={`relative surface-card border-border/60 flex flex-col min-h-0 ${
         presentationMode ? "h-full flex-1" : "overflow-hidden"
       }`}
@@ -304,6 +307,7 @@ export function GanttChart({
               isLast={index === laneRows.length - 1}
               isLocked={isLocked}
               isCollapsed={lane.collapsed}
+              laneIndex={index}
               onToggleCollapse={() =>
                 updateSwimLane(roadmap.id, lane.id, { collapsed: !lane.collapsed })
               }
@@ -381,7 +385,7 @@ export function GanttChart({
                 })}
               </div>
 
-              {laneRows.map(({ lane, contentHeight, rowHeight }) => (
+              {laneRows.map(({ lane, contentHeight, rowHeight, index }) => (
                 <GanttLaneTimeline
                   key={lane.id}
                   lane={lane}
@@ -397,6 +401,7 @@ export function GanttChart({
                   onLaneDragOver={setDragTargetLane}
                   isDragTarget={dragTargetLane === lane.id}
                   presentationMode={presentationMode}
+                  laneIndex={index}
                 />
               ))}
             </div>
@@ -413,6 +418,6 @@ export function GanttChart({
           🔒 Roadmap Locked
         </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
