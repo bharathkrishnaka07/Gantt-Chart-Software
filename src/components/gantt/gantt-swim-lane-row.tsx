@@ -1,10 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, ChevronRight, GripVertical, Plus } from "lucide-react";
 import type { SwimLane as SwimLaneType, RoadmapTask } from "@/types/roadmap";
 import { GanttTaskBar } from "./gantt-task-bar";
-import { LANE_HEIGHT } from "@/lib/timeline";
+import { layoutTasksInLane } from "@/lib/gantt/collision";
 import { cn } from "@/lib/utils";
 import { SwimLaneMenu } from "./swim-lane-menu";
 
@@ -15,7 +16,7 @@ interface GanttSwimLaneRowProps {
   isLast: boolean;
   tasks: RoadmapTask[];
   timelineWidth: number;
-  getTaskPosition: (task: RoadmapTask) => { left: number; width: number };
+  getTaskRect: (start: Date, end: Date) => { left: number; width: number };
   isLocked: boolean;
   selectedTaskId: string | null;
   onSelectTask: (id: string) => void;
@@ -37,7 +38,7 @@ export function GanttSwimLaneRow({
   isLast,
   tasks,
   timelineWidth,
-  getTaskPosition,
+  getTaskRect,
   isLocked,
   selectedTaskId,
   onSelectTask,
@@ -47,7 +48,15 @@ export function GanttSwimLaneRow({
   onLaneDragOver,
   isDragTarget,
 }: GanttSwimLaneRowProps) {
-  const laneTasks = tasks.filter((t) => t.laneId === lane.id);
+  const laneTasks = useMemo(
+    () => tasks.filter((t) => t.laneId === lane.id),
+    [tasks, lane.id]
+  );
+
+  const { layouts, contentHeight } = useMemo(
+    () => layoutTasksInLane(laneTasks, getTaskRect),
+    [laneTasks, getTaskRect]
+  );
 
   return (
     <div
@@ -55,13 +64,13 @@ export function GanttSwimLaneRow({
         "lane-row flex border-b border-border/40 transition-colors",
         isDragTarget && "bg-primary/[0.04]"
       )}
-      style={{ minHeight: lane.collapsed ? 40 : LANE_HEIGHT }}
+      style={{ minHeight: lane.collapsed ? 40 : contentHeight }}
       onPointerEnter={() => onLaneDragOver(lane.id)}
     >
       {/* Sticky lane label */}
       <div
-        className="sticky left-0 z-20 flex shrink-0 items-center gap-1.5 border-r border-border/40 bg-white/95 backdrop-blur-md px-2.5"
-        style={{ width: 220 }}
+        className="sticky left-0 z-20 flex shrink-0 items-start gap-1.5 border-r border-border/40 bg-white/95 backdrop-blur-md px-2.5 py-3 self-stretch"
+        style={{ width: 220, minHeight: lane.collapsed ? 40 : contentHeight }}
       >
         <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
         <div
@@ -101,20 +110,23 @@ export function GanttSwimLaneRow({
         {!lane.collapsed && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: LANE_HEIGHT, opacity: 1 }}
+            animate={{ height: contentHeight, opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="relative flex-1"
-            style={{ width: timelineWidth, minWidth: timelineWidth }}
+            style={{ width: timelineWidth, minWidth: timelineWidth, height: contentHeight }}
           >
             {laneTasks.map((task) => {
-              const pos = getTaskPosition(task);
+              const layout = layouts.get(task.id)!;
               return (
                 <GanttTaskBar
                   key={task.id}
                   task={task}
-                  left={pos.left}
-                  width={pos.width}
+                  left={layout.left}
+                  width={layout.width}
+                  top={layout.top}
+                  row={layout.row}
+                  laneColor={lane.color}
                   isLocked={isLocked}
                   isSelected={selectedTaskId === task.id}
                   onSelect={() => onSelectTask(task.id)}

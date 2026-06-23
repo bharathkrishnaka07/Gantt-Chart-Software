@@ -12,13 +12,13 @@ import {
   pixelToDate,
   snapToDay,
   clampDate,
-  LANE_HEIGHT,
+  toISODate,
   TIMELINE_HEADER_HEIGHT,
 } from "@/lib/timeline";
+import { layoutTasksInLane } from "@/lib/gantt/collision";
 import { GanttTimelineHeader } from "./gantt-timeline-header";
 import { GanttSwimLaneRow } from "./gantt-swim-lane-row";
 import { GanttMilestone } from "./gantt-milestone";
-import { toISODate } from "@/lib/timeline";
 
 interface GanttChartProps {
   roadmap: Roadmap;
@@ -62,15 +62,9 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
   const isLocked = roadmap.isLocked || readOnly;
   const showLockBadge = roadmap.isLocked && !readOnly;
 
-  const getPos = useCallback(
-    (task: RoadmapTask) =>
-      getTaskPosition(
-        new Date(task.startDate),
-        new Date(task.endDate),
-        columns,
-        timelineStart,
-        timelineEnd
-      ),
+  const getRect = useCallback(
+    (start: Date, end: Date) =>
+      getTaskPosition(start, end, columns, timelineStart, timelineEnd),
     [columns, timelineStart, timelineEnd]
   );
 
@@ -168,7 +162,13 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
 
   const sortedLanes = [...roadmap.swimLanes].sort((a, b) => a.order - b.order);
   const totalHeight =
-    sortedLanes.reduce((h, l) => h + (l.collapsed ? 40 : LANE_HEIGHT), 0) + TIMELINE_HEADER_HEIGHT + 52;
+    sortedLanes.reduce((h, lane) => {
+      if (lane.collapsed) return h + 40;
+      const laneTasks = roadmap.tasks.filter((t) => t.laneId === lane.id);
+      return h + layoutTasksInLane(laneTasks, getRect).contentHeight;
+    }, 0) +
+    TIMELINE_HEADER_HEIGHT +
+    52;
 
   const todayLeft =
     new Date() >= timelineStart && new Date() <= timelineEnd
@@ -248,7 +248,7 @@ export function GanttChart({ roadmap, readOnly = false }: GanttChartProps) {
                 isLast={index === sortedLanes.length - 1}
                 tasks={roadmap.tasks}
                 timelineWidth={timelineWidth}
-                getTaskPosition={getPos}
+                getTaskRect={getRect}
                 isLocked={isLocked}
                 selectedTaskId={selectedTaskId}
                 onSelectTask={setSelectedTaskId}

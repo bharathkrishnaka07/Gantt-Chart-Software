@@ -14,6 +14,7 @@ import {
   startOfYear,
 } from "date-fns";
 import type { TimelineColumn, ZoomLevel } from "@/types/roadmap";
+import { MIN_TASK_WIDTH } from "@/lib/gantt/collision";
 
 const COLUMN_WIDTHS: Record<ZoomLevel, number> = {
   year: 120,
@@ -158,7 +159,7 @@ export function getTaskPosition(
   const right = dateToPixel(endDate, columns, timelineStart, timelineEnd);
   return {
     left,
-    width: Math.max(right - left, 24),
+    width: Math.max(right - left, MIN_TASK_WIDTH),
   };
 }
 
