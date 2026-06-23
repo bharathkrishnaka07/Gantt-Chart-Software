@@ -17,8 +17,8 @@ function midMonth(year: number, month: number): Date {
   return new Date(year, month, 15);
 }
 
-function lane(id: string, name: string, order: number, color: string): SwimLane {
-  return { id, name, color, order, collapsed: false };
+function lane(name: string, order: number, color: string): SwimLane {
+  return { id: generateId(), name, color, order, collapsed: false };
 }
 
 function task(
@@ -57,11 +57,11 @@ function milestone(title: string, date: Date, color = "#14B8A6"): Milestone {
 }
 
 export function createPMCareerRoadmap(): Roadmap {
-  const s1 = lane("s1", "S1: Career Clarity", 0, "#6366F1");
-  const s2 = lane("s2", "S2: Professional Development", 1, "#2563EB");
-  const s3 = lane("s3", "S3: Employability", 2, "#14B8A6");
-  const s4 = lane("s4", "S4: Networking", 3, "#F59E0B");
-  const s5 = lane("s5", "S5: Personal & Future", 4, "#10B981");
+  const s1 = lane("S1: Career Clarity", 0, "#6366F1");
+  const s2 = lane("S2: Professional Development", 1, "#2563EB");
+  const s3 = lane("S3: Employability", 2, "#14B8A6");
+  const s4 = lane("S4: Networking", 3, "#F59E0B");
+  const s5 = lane("S5: Personal & Future", 4, "#10B981");
 
   const now = new Date().toISOString();
 
@@ -164,11 +164,11 @@ export function createPMCareerRoadmap(): Roadmap {
 
 export function createSoftwareEngineeringRoadmap(): Roadmap {
   const lanes = [
-    lane("se1", "S1: Core Skills", 0, "#2563EB"),
-    lane("se2", "S2: Projects", 1, "#14B8A6"),
-    lane("se3", "S3: Open Source", 2, "#10B981"),
-    lane("se4", "S4: Networking", 3, "#F59E0B"),
-    lane("se5", "S5: Career Growth", 4, "#8B5CF6"),
+    lane("S1: Core Skills", 0, "#2563EB"),
+    lane("S2: Projects", 1, "#14B8A6"),
+    lane("S3: Open Source", 2, "#10B981"),
+    lane("S4: Networking", 3, "#F59E0B"),
+    lane("S5: Career Growth", 4, "#8B5CF6"),
   ];
   const now = new Date().toISOString();
   return {
@@ -200,11 +200,11 @@ export function createSoftwareEngineeringRoadmap(): Roadmap {
 
 export function createDataScienceRoadmap(): Roadmap {
   const lanes = [
-    lane("ds1", "S1: Foundations", 0, "#2563EB"),
-    lane("ds2", "S2: ML Projects", 1, "#14B8A6"),
-    lane("ds3", "S3: Portfolio", 2, "#10B981"),
-    lane("ds4", "S4: Community", 3, "#F59E0B"),
-    lane("ds5", "S5: Specialization", 4, "#8B5CF6"),
+    lane("S1: Foundations", 0, "#2563EB"),
+    lane("S2: ML Projects", 1, "#14B8A6"),
+    lane("S3: Portfolio", 2, "#10B981"),
+    lane("S4: Community", 3, "#F59E0B"),
+    lane("S5: Specialization", 4, "#8B5CF6"),
   ];
   const now = new Date().toISOString();
   return {
@@ -233,11 +233,11 @@ export function createDataScienceRoadmap(): Roadmap {
 
 export function createProductManagementRoadmap(): Roadmap {
   const lanes = [
-    lane("pm1", "S1: Product Skills", 0, "#2563EB"),
-    lane("pm2", "S2: User Research", 1, "#14B8A6"),
-    lane("pm3", "S3: Strategy", 2, "#10B981"),
-    lane("pm4", "S4: Stakeholders", 3, "#F59E0B"),
-    lane("pm5", "S5: Launch", 4, "#8B5CF6"),
+    lane("S1: Product Skills", 0, "#2563EB"),
+    lane("S2: User Research", 1, "#14B8A6"),
+    lane("S3: Strategy", 2, "#10B981"),
+    lane("S4: Stakeholders", 3, "#F59E0B"),
+    lane("S5: Launch", 4, "#8B5CF6"),
   ];
   const now = new Date().toISOString();
   return {
@@ -266,11 +266,11 @@ export function createProductManagementRoadmap(): Roadmap {
 
 export function createGraduateCareerRoadmap(): Roadmap {
   const lanes = [
-    lane("g1", "S1: Career Exploration", 0, "#2563EB"),
-    lane("g2", "S2: Skills Building", 1, "#14B8A6"),
-    lane("g3", "S3: Applications", 2, "#10B981"),
-    lane("g4", "S4: Networking", 3, "#F59E0B"),
-    lane("g5", "S5: Life Planning", 4, "#8B5CF6"),
+    lane("S1: Career Exploration", 0, "#2563EB"),
+    lane("S2: Skills Building", 1, "#14B8A6"),
+    lane("S3: Applications", 2, "#10B981"),
+    lane("S4: Networking", 3, "#F59E0B"),
+    lane("S5: Life Planning", 4, "#8B5CF6"),
   ];
   const now = new Date().toISOString();
   return {
@@ -339,7 +339,7 @@ export function duplicateRoadmap(roadmap: Roadmap, asTemplate = false): Roadmap 
 
 export function createBlankRoadmap(title = "Untitled Roadmap"): Roadmap {
   const now = new Date().toISOString();
-  const s1 = lane(generateId(), "S1: New Lane", 0, "#2563EB");
+  const s1 = lane("S1: New Lane", 0, "#2563EB");
   return {
     id: generateId(),
     title,
