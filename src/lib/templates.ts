@@ -4,6 +4,19 @@ import { generateId } from "@/lib/utils";
 const JUNE_2026 = new Date(2026, 5, 1).toISOString();
 const MARCH_2027 = new Date(2027, 2, 31).toISOString();
 
+/** Month is 0-indexed (0 = January). Returns first/last day of month. */
+function monthStart(year: number, month: number): Date {
+  return new Date(year, month, 1);
+}
+
+function monthEnd(year: number, month: number): Date {
+  return new Date(year, month + 1, 0);
+}
+
+function midMonth(year: number, month: number): Date {
+  return new Date(year, month, 15);
+}
+
 function lane(id: string, name: string, order: number, color: string): SwimLane {
   return { id, name, color, order, collapsed: false };
 }
@@ -44,18 +57,19 @@ function milestone(title: string, date: Date, color = "#14B8A6"): Milestone {
 }
 
 export function createPMCareerRoadmap(): Roadmap {
-  const s1 = lane("s1", "S1: Career Clarity", 0, "#2563EB");
-  const s2 = lane("s2", "S2: Professional Development", 1, "#14B8A6");
-  const s3 = lane("s3", "S3: Employability", 2, "#10B981");
+  const s1 = lane("s1", "S1: Career Clarity", 0, "#6366F1");
+  const s2 = lane("s2", "S2: Professional Development", 1, "#2563EB");
+  const s3 = lane("s3", "S3: Employability", 2, "#14B8A6");
   const s4 = lane("s4", "S4: Networking", 3, "#F59E0B");
-  const s5 = lane("s5", "S5: Personal & Future", 4, "#8B5CF6");
+  const s5 = lane("s5", "S5: Personal & Future", 4, "#10B981");
 
   const now = new Date().toISOString();
 
   return {
     id: generateId(),
     title: "Project Management Career Roadmap",
-    description: "Career transition roadmap inspired by whiteboard planning session",
+    description:
+      "Whiteboard roadmap — Jun 2026 to Mar 2027. S1 Career Clarity through S5 Personal & Future.",
     startDate: JUNE_2026,
     endDate: MARCH_2027,
     isLocked: false,
@@ -64,54 +78,84 @@ export function createPMCareerRoadmap(): Roadmap {
     zoomLevel: "month",
     swimLanes: [s1, s2, s3, s4, s5],
     tasks: [
-      task("Converse with Mentor", s1.id, new Date(2026, 5, 15), new Date(2026, 7, 31), {
-        color: "#2563EB",
-        description: "Regular sessions with Matt (PM) and Oliver for career guidance",
-        tags: ["mentorship"],
+      // ── S1: Career Clarity ──
+      task("Matt – PM, Oliver", s1.id, monthStart(2026, 5), monthEnd(2026, 5), {
+        color: "#6366F1",
+        description: "Mentor conversations with Matt (PM) and Oliver",
+        tags: ["mentorship", "career-clarity"],
+        priority: "high",
       }),
-      task("PMI Certification Research", s1.id, new Date(2026, 9, 1), new Date(2026, 10, 30), {
+
+      // ── S2: Professional Development ──
+      task("PMI", s2.id, monthStart(2026, 5), midMonth(2026, 6), {
         color: "#2563EB",
-        tags: ["certification"],
+        tags: ["certification", "pmi"],
       }),
-      task("Review PM Job Advertisements", s2.id, new Date(2026, 6, 1), new Date(2026, 7, 31), {
+      task("Job Adverts", s2.id, monthStart(2026, 5), midMonth(2026, 6), {
+        color: "#2563EB",
+        description: "Review PM job advertisements",
+        tags: ["research", "jobs"],
+      }),
+      task("Apply", s2.id, monthStart(2026, 5), monthEnd(2026, 6), {
+        color: "#EF4444",
+        description: "Active job applications",
+        tags: ["applications"],
+        priority: "high",
+      }),
+      task("Targeted Work", s2.id, midMonth(2026, 7), monthEnd(2027, 2), {
+        color: "#2563EB",
+        description: "Targeted work? — ongoing professional development through graduation",
+        tags: ["continuous"],
+      }),
+
+      // ── S3: Employability ──
+      task("Polish / Review PM Profiles · LinkedIn", s3.id, monthStart(2026, 5), midMonth(2026, 6), {
         color: "#14B8A6",
-        tags: ["research"],
+        tags: ["linkedin", "profiles"],
       }),
-      task("Resume Enhancement", s2.id, new Date(2026, 7, 1), new Date(2026, 8, 30), {
+      task("Resume", s3.id, midMonth(2026, 6), monthEnd(2026, 7), {
         color: "#14B8A6",
         tags: ["resume"],
       }),
-      task("LinkedIn Optimisation", s3.id, new Date(2026, 5, 1), new Date(2026, 6, 31), {
-        color: "#10B981",
-        tags: ["linkedin"],
-      }),
-      task("Interview Preparation", s3.id, new Date(2026, 9, 1), new Date(2026, 10, 30), {
-        color: "#10B981",
+      task("Interviewing", s3.id, monthStart(2026, 8), monthEnd(2026, 10), {
+        color: "#14B8A6",
         tags: ["interviews"],
       }),
-      task("Join PMI Group", s4.id, new Date(2026, 5, 1), new Date(2026, 6, 31), {
+
+      // ── S4: Networking ──
+      task("PMI Group", s4.id, monthStart(2026, 5), monthEnd(2026, 6), {
         color: "#F59E0B",
-        tags: ["networking"],
+        tags: ["pmi", "networking"],
       }),
-      task("Build Online Brand", s4.id, new Date(2026, 7, 1), new Date(2026, 8, 30), {
+      task("Research – PMI WA", s4.id, monthStart(2026, 5), monthEnd(2026, 6), {
+        color: "#F59E0B",
+        tags: ["research", "pmi-wa"],
+      }),
+      task("LinkedIn", s4.id, monthStart(2026, 7), monthEnd(2026, 7), {
+        color: "#F59E0B",
+        tags: ["linkedin"],
+      }),
+      task("Online Brand", s4.id, monthStart(2026, 8), monthEnd(2026, 8), {
         color: "#F59E0B",
         tags: ["brand"],
       }),
-      task("Graduate Visa Planning", s5.id, new Date(2026, 10, 15), new Date(2027, 0, 31), {
-        color: "#8B5CF6",
-        tags: ["visa"],
+
+      // ── S5: Personal & Future ──
+      task("Visa Graduate", s5.id, monthStart(2026, 10), monthEnd(2027, 1), {
+        color: "#10B981",
+        tags: ["visa", "graduate"],
       }),
-      task("3-Year Career Roadmap", s5.id, new Date(2026, 11, 1), new Date(2027, 2, 31), {
-        color: "#8B5CF6",
+      task("3-Year Roadmap", s5.id, monthStart(2026, 10), monthEnd(2027, 1), {
+        color: "#10B981",
+        description: "Long-term 3-year career roadmap planning",
         tags: ["planning"],
       }),
     ],
     milestones: [
-      milestone("Graduate", new Date(2026, 11, 15)),
-      milestone("PMI Certified", new Date(2027, 2, 1), "#2563EB"),
-      milestone("Interview Round 1", new Date(2026, 10, 1), "#F59E0B"),
-      milestone("First PM Role", new Date(2027, 1, 1), "#10B981"),
-      milestone("Visa Planning Complete", new Date(2027, 0, 15), "#8B5CF6"),
+      milestone("Clarity Checkpoint *", monthEnd(2026, 6), "#6366F1"),
+      milestone("Clarity Checkpoint *", monthEnd(2026, 7), "#6366F1"),
+      milestone("Major Milestone **", midMonth(2026, 10), "#6366F1"),
+      milestone("Grad", midMonth(2026, 11), "#2563EB"),
     ],
     createdAt: now,
     updatedAt: now,

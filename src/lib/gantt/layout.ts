@@ -3,13 +3,12 @@
 export const LANE_HEADER_WIDTH = 340;
 export const TIMELINE_HEADER_HEIGHT = 64;
 export const MILESTONE_ROW_HEIGHT = 64;
-export const LANE_LABEL_ACTIONS_HEIGHT = 44;
-export const LANE_LABEL_PADDING = 24;
+export const LANE_LABEL_PADDING = 16;
 
 export const TASK_ROW_HEIGHT = 44;
 export const TASK_ROW_GAP = 12;
 export const LANE_PADDING_Y = 16;
-export const LANE_MIN_HEIGHT = 96;
+export const LANE_MIN_HEIGHT = 52;
 export const MIN_TASK_WIDTH = 64;
 
 export const COLUMN_WIDTHS = {
@@ -19,13 +18,13 @@ export const COLUMN_WIDTHS = {
   year: 140,
 } as const;
 
-/** Minimum row height so multi-line lane titles + actions are never clipped */
+/** Minimum row height for lane label (single-line header + optional 2nd line) */
 export function estimateLaneLabelHeight(laneName: string): number {
-  const usableWidth = LANE_HEADER_WIDTH - 56;
-  const charsPerLine = Math.max(12, Math.floor(usableWidth / 7.5));
-  const lines = Math.max(1, Math.ceil(laneName.length / charsPerLine));
-  const titleHeight = lines * 22;
-  return LANE_LABEL_PADDING + titleHeight + LANE_LABEL_ACTIONS_HEIGHT;
+  const usableWidth = LANE_HEADER_WIDTH - 108;
+  const charsPerLine = Math.max(14, Math.floor(usableWidth / 7.5));
+  const lines = Math.min(2, Math.max(1, Math.ceil(laneName.length / charsPerLine)));
+  const titleHeight = lines * 20;
+  return LANE_LABEL_PADDING + titleHeight + 20;
 }
 
 export function getLaneRowHeight(

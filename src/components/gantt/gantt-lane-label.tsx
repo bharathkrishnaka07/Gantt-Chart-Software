@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, GripVertical, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import type { SwimLane as SwimLaneType } from "@/types/roadmap";
 import { LANE_HEADER_WIDTH } from "@/lib/gantt/layout";
 import { cn } from "@/lib/utils";
@@ -31,67 +31,60 @@ export function GanttLaneLabel({
 }: GanttLaneLabelProps) {
   return (
     <div
-      className={cn(
-        "flex flex-col border-b border-border/50 bg-white px-4 py-3",
-        isCollapsed && "justify-center"
-      )}
+      className="flex items-center border-b border-border/50 bg-white group/lane"
       style={{
         width: LANE_HEADER_WIDTH,
         minHeight: rowHeight,
         height: rowHeight,
       }}
     >
-      {!isCollapsed && (
-        <div className="flex items-start gap-2.5 flex-1 min-h-0">
-          <div
-            className="mt-0.5 h-3.5 w-3.5 rounded-full shrink-0 ring-2 ring-white shadow-sm"
-            style={{ backgroundColor: lane.color }}
-          />
-          <p className="text-sm font-semibold leading-relaxed text-foreground whitespace-normal break-words overflow-visible">
-            {lane.name}
-          </p>
-        </div>
-      )}
-
-      {isCollapsed && (
-        <div className="flex items-center justify-center gap-2">
-          <div
-            className="h-3.5 w-3.5 rounded-full shrink-0"
-            style={{ backgroundColor: lane.color }}
-          />
-          <span className="text-xs font-semibold text-muted-foreground whitespace-normal break-words text-center leading-snug">
-            {lane.name}
-          </span>
-        </div>
-      )}
-
-      <div className="flex items-center gap-0.5 mt-2 shrink-0">
-        <GripVertical className="h-4 w-4 text-muted-foreground/30 shrink-0" />
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          aria-label={isCollapsed ? "Expand lane" : "Collapse lane"}
-        >
-          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        <SwimLaneMenu
-          roadmapId={roadmapId}
-          lane={lane}
-          isLocked={isLocked}
-          isFirst={isFirst}
-          isLast={isLast}
+      <div className="flex w-full items-center gap-2 px-3 py-2 min-h-[52px]">
+        <div
+          className="h-3 w-3 rounded-full shrink-0 ring-2 ring-white shadow-sm"
+          style={{ backgroundColor: lane.color }}
         />
-        {!isLocked && (
+
+        <p
+          className={cn(
+            "flex-1 min-w-0 text-sm font-semibold leading-snug text-foreground",
+            isCollapsed ? "truncate" : "line-clamp-2"
+          )}
+          title={lane.name}
+        >
+          {lane.name}
+        </p>
+
+        <div className="flex items-center gap-0.5 shrink-0">
           <button
             type="button"
-            onClick={onAddTask}
-            className="rounded-md p-1 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-            aria-label="Add task"
+            onClick={onToggleCollapse}
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label={isCollapsed ? "Expand lane" : "Collapse lane"}
           >
-            <Plus className="h-4 w-4" />
+            {isCollapsed ? (
+              <ChevronRight className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
           </button>
-        )}
+          <SwimLaneMenu
+            roadmapId={roadmapId}
+            lane={lane}
+            isLocked={isLocked}
+            isFirst={isFirst}
+            isLast={isLast}
+          />
+          {!isLocked && (
+            <button
+              type="button"
+              onClick={onAddTask}
+              className="rounded-md p-1.5 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+              aria-label="Add task"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
