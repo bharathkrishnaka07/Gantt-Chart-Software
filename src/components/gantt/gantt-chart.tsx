@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Lock } from "lucide-react";
-import { motion } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Roadmap, DragMode } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import {
@@ -259,10 +258,7 @@ export function GanttChart({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97, filter: "blur(8px)" }}
-      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      transition={{ type: "spring", stiffness: 200, damping: 26, mass: 0.8 }}
+    <div
       className={`relative surface-card border-border/60 flex flex-col min-h-0 ${
         presentationMode ? "h-full flex-1" : "overflow-hidden"
       }`}
@@ -308,7 +304,6 @@ export function GanttChart({
               isLast={index === laneRows.length - 1}
               isLocked={isLocked}
               isCollapsed={lane.collapsed}
-              laneIndex={index}
               onToggleCollapse={() =>
                 updateSwimLane(roadmap.id, lane.id, { collapsed: !lane.collapsed })
               }
@@ -386,7 +381,7 @@ export function GanttChart({
                 })}
               </div>
 
-              {laneRows.map(({ lane, contentHeight, rowHeight, index }) => (
+              {laneRows.map(({ lane, contentHeight, rowHeight }) => (
                 <GanttLaneTimeline
                   key={lane.id}
                   lane={lane}
@@ -402,7 +397,6 @@ export function GanttChart({
                   onLaneDragOver={setDragTargetLane}
                   isDragTarget={dragTargetLane === lane.id}
                   presentationMode={presentationMode}
-                  laneIndex={index}
                 />
               ))}
             </div>
@@ -411,15 +405,11 @@ export function GanttChart({
       </div>
 
       {showLockBadge && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-4 right-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-lg"
-        >
+        <div className="absolute bottom-4 right-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-sm">
           <Lock className="h-4 w-4" aria-hidden />
           Roadmap locked
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }

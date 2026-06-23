@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { motion } from "motion/react";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { GanttChart } from "@/components/gantt/gantt-chart";
 import { GanttToolbar } from "@/components/gantt/gantt-toolbar";
@@ -12,7 +11,6 @@ import { MobileRoadmapView } from "@/components/roadmap/mobile-roadmap-view";
 import { MilestoneDetailPanel } from "@/components/roadmap/milestone-detail-panel";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { springSnappy } from "@/lib/motion/presets";
 
 export default function RoadmapPage() {
   const params = useParams();
@@ -32,7 +30,7 @@ export default function RoadmapPage() {
   if (!roadmap) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-muted-foreground">Roadmap not found</p>
+        <p className="text-slate-600">Roadmap not found</p>
         <Button asChild>
           <Link href="/">Back to Dashboard</Link>
         </Button>
@@ -41,23 +39,13 @@ export default function RoadmapPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={springSnappy}
-      className="mesh-bg min-h-full flex flex-col"
-    >
+    <div className="mesh-bg min-h-full flex flex-col">
       <div className="flex-1 w-full mx-auto px-2 sm:px-4 lg:px-5 py-3 sm:py-4 space-y-3 min-h-0">
         <GanttToolbar roadmap={roadmap} />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ ...springSnappy, delay: 0.08 }}
-          className={`flex-1 min-h-0 ${mobileTimelineView ? "block" : "hidden md:block"}`}
-        >
+        <div className={`flex-1 min-h-0 ${mobileTimelineView ? "block" : "hidden md:block"}`}>
           <GanttChart roadmap={roadmap} />
-        </motion.div>
+        </div>
 
         {!mobileTimelineView && <MobileRoadmapView roadmap={roadmap} />}
 
@@ -65,6 +53,6 @@ export default function RoadmapPage() {
         <MilestoneDetailPanel roadmap={roadmap} />
         <PresentationMode roadmap={roadmap} />
       </div>
-    </motion.div>
+    </div>
   );
 }

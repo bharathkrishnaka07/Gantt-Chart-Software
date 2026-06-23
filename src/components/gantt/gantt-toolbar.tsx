@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
 import type { Roadmap, ZoomLevel } from "@/types/roadmap";
 import { useRoadmapStore } from "@/lib/stores/roadmap-store";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,6 @@ import {
 import { useState } from "react";
 import { TimelineSettings } from "./timeline-settings";
 import { RoadmapSettingsDialog } from "@/components/roadmap/roadmap-settings-dialog";
-import { springSnappy } from "@/lib/motion/presets";
 import { cn } from "@/lib/utils";
 
 const ZOOM_OPTIONS: { value: ZoomLevel; label: string }[] = [
@@ -106,12 +104,7 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={springSnappy}
-        className="surface-card p-4 sm:p-5"
-      >
+      <div className="surface-card p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link href="/">
@@ -254,7 +247,7 @@ export function GanttToolbar({ roadmap }: GanttToolbarProps) {
           </DropdownMenu>
         </div>
         </div>
-      </motion.div>
+      </div>
 
       <RoadmapSettingsDialog
         roadmap={roadmap}

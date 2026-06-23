@@ -1,11 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "motion/react";
 import type { SwimLane as SwimLaneType, RoadmapTask } from "@/types/roadmap";
 import { GanttTaskBar } from "./gantt-task-bar";
 import { layoutTasksInLane } from "@/lib/gantt/collision";
-import { laneReveal } from "@/lib/motion/presets";
 import { cn } from "@/lib/utils";
 
 interface GanttLaneTimelineProps {
@@ -26,7 +24,6 @@ interface GanttLaneTimelineProps {
   onLaneDragOver: (laneId: string) => void;
   isDragTarget: boolean;
   presentationMode?: boolean;
-  laneIndex?: number;
 }
 
 export function GanttLaneTimeline({
@@ -43,7 +40,6 @@ export function GanttLaneTimeline({
   onLaneDragOver,
   isDragTarget,
   presentationMode = false,
-  laneIndex = 0,
 }: GanttLaneTimelineProps) {
   const laneTasks = useMemo(
     () => tasks.filter((t) => t.laneId === lane.id),
@@ -57,13 +53,9 @@ export function GanttLaneTimeline({
 
   if (lane.collapsed) {
     return (
-      <motion.div
-        custom={laneIndex}
-        variants={laneReveal}
-        initial="hidden"
-        animate="visible"
+      <div
         className={cn(
-          "border-b border-border/50 bg-white/30 transition-colors origin-left",
+          "border-b border-border/50 bg-white transition-colors",
           isDragTarget && "bg-primary/[0.04]"
         )}
         style={{ height: rowHeight, width: timelineWidth, minWidth: timelineWidth }}
@@ -73,23 +65,16 @@ export function GanttLaneTimeline({
   }
 
   return (
-    <motion.div
-      custom={laneIndex}
-      variants={laneReveal}
-      initial="hidden"
-      animate="visible"
+    <div
       className={cn(
-        "relative border-b border-border/50 bg-white/30 transition-colors origin-left overflow-hidden",
-        isDragTarget && "bg-primary/[0.06]"
+        "relative border-b border-border/50 bg-white transition-colors",
+        isDragTarget && "bg-primary/[0.04]"
       )}
       style={{ height: rowHeight, width: timelineWidth, minWidth: timelineWidth }}
       onPointerEnter={() => onLaneDragOver(lane.id)}
     >
-      <div
-        className="relative h-full"
-        style={{ height: contentHeight, minHeight: rowHeight }}
-      >
-        {laneTasks.map((task, taskIndex) => {
+      <div className="relative h-full" style={{ height: contentHeight, minHeight: rowHeight }}>
+        {laneTasks.map((task) => {
           const layout = layouts.get(task.id)!;
           return (
             <GanttTaskBar
@@ -105,11 +90,10 @@ export function GanttLaneTimeline({
               onSelect={() => onSelectTask(task.id)}
               onDragStart={(e, mode) => onDragStart(task.id, e, mode)}
               presentationMode={presentationMode}
-              enterDelay={laneIndex * 0.07 + taskIndex * 0.05 + 0.15}
             />
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }

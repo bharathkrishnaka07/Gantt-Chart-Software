@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import type { RoadmapTask } from "@/types/roadmap";
 import {
   getTaskBackground,
@@ -9,7 +8,6 @@ import {
   TASK_ROW_HEIGHT,
 } from "@/lib/gantt/collision";
 import { estimateTaskLabelWidth } from "@/lib/gantt/layout";
-import { springBouncy } from "@/lib/motion/presets";
 import {
   Tooltip,
   TooltipContent,
@@ -29,7 +27,6 @@ interface GanttTaskBarProps {
   onSelect: () => void;
   onDragStart: (e: React.PointerEvent, mode: "move" | "resize-start" | "resize-end") => void;
   presentationMode?: boolean;
-  enterDelay?: number;
 }
 
 export function GanttTaskBar({
@@ -44,7 +41,6 @@ export function GanttTaskBar({
   onSelect,
   onDragStart,
   presentationMode = false,
-  enterDelay = 0,
 }: GanttTaskBarProps) {
   const isDone = task.status === "done";
   const accent = getTaskBorderAccent(task.color ?? laneColor ?? "#2563EB");
@@ -54,22 +50,9 @@ export function GanttTaskBar({
     : Math.max(width, MIN_TASK_WIDTH);
 
   const bar = (
-    <motion.div
-      initial={{ opacity: 0, scaleX: 0, scaleY: 0.5, filter: "blur(4px)" }}
-      animate={{ opacity: 1, scaleX: 1, scaleY: 1, filter: "blur(0px)" }}
-      whileHover={
-        isLocked
-          ? undefined
-          : {
-              y: -4,
-              scale: 1.04,
-              boxShadow: "0 12px 32px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(37,99,235,0.1)",
-            }
-      }
-      whileTap={isLocked ? undefined : { scale: 0.98, y: 0 }}
-      transition={{ ...springBouncy, delay: enterDelay }}
+    <div
       className={cn(
-        "task-bar absolute flex items-center gap-2 rounded-xl border border-white/30 px-3 text-sm font-medium select-none",
+        "task-bar absolute flex items-center gap-2 rounded-xl border border-white/40 px-3 text-sm font-medium select-none",
         !isLocked && "cursor-grab active:cursor-grabbing",
         isSelected && "ring-2 ring-primary/40 ring-offset-1 ring-offset-transparent z-10",
         isDone
@@ -83,7 +66,6 @@ export function GanttTaskBar({
         height: TASK_ROW_HEIGHT,
         backgroundColor: isDone ? "rgba(241, 245, 249, 0.95)" : background,
         zIndex: row + 1,
-        transformOrigin: `${left}px center`,
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -128,7 +110,7 @@ export function GanttTaskBar({
       >
         {task.title}
       </span>
-    </motion.div>
+    </div>
   );
 
   if (presentationMode) return bar;

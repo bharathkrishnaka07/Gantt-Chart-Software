@@ -1,10 +1,8 @@
 "use client";
 
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
-import { motion } from "motion/react";
 import type { SwimLane as SwimLaneType } from "@/types/roadmap";
 import { LANE_HEADER_WIDTH } from "@/lib/gantt/layout";
-import { laneReveal } from "@/lib/motion/presets";
 import { cn } from "@/lib/utils";
 import { SwimLaneMenu } from "./swim-lane-menu";
 
@@ -18,7 +16,6 @@ interface GanttLaneLabelProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onAddTask: () => void;
-  laneIndex?: number;
 }
 
 export function GanttLaneLabel({
@@ -31,15 +28,10 @@ export function GanttLaneLabel({
   isCollapsed,
   onToggleCollapse,
   onAddTask,
-  laneIndex = 0,
 }: GanttLaneLabelProps) {
   return (
-    <motion.div
-      custom={laneIndex}
-      variants={laneReveal}
-      initial="hidden"
-      animate="visible"
-      className="flex items-center border-b border-border/50 bg-white group/lane origin-left"
+    <div
+      className="flex items-center border-b border-border/50 bg-white group/lane"
       style={{
         width: LANE_HEADER_WIDTH,
         minHeight: rowHeight,
@@ -94,7 +86,7 @@ export function GanttLaneLabel({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
+import { AppLogo } from "@/components/brand/app-logo";
 import {
   LayoutDashboard,
   Map,
   Plus,
   ChevronRight,
-  Sparkles,
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
@@ -20,7 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { SyncIndicator } from "@/components/layout/sync-indicator";
 import { LockIcon } from "@/components/ui/lock-indicator";
-import { springMicro, springSnappy, pageEnter } from "@/lib/motion/presets";
+import { springSnappy } from "@/lib/motion/presets";
 import {
   Tooltip,
   TooltipContent,
@@ -71,20 +71,13 @@ export function AppShell({ children }: AppShellProps) {
           className={cn("flex items-center group", collapsed ? "justify-center" : "gap-3")}
           onClick={onNavigate}
         >
-          <motion.div
-            className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 shrink-0"
-            whileHover={{ scale: 1.08, rotate: 6 }}
-            whileTap={{ scale: 0.94 }}
-            transition={springMicro}
-          >
-            <Sparkles className="h-4 w-4 text-white" />
-          </motion.div>
+          <AppLogo />
           {!collapsed && (
             <div>
-              <p className="font-semibold text-sm tracking-tight group-hover:text-primary transition-colors">
+              <p className="font-semibold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">
                 Roadmap Planner
               </p>
-              <p className="text-[11px] text-muted-foreground">Career planning</p>
+              <p className="text-[11px] text-slate-500">Career planning</p>
             </div>
           )}
         </Link>
@@ -163,17 +156,12 @@ export function AppShell({ children }: AppShellProps) {
               <p className="px-3 py-2 text-xs text-muted-foreground">No roadmaps yet</p>
             )
           ) : (
-            roadmaps.map((roadmap, i) => {
+            roadmaps.map((roadmap) => {
               const isActive = pathname === `/roadmap/${roadmap.id}`;
               const isCurrent = roadmap.id === activeRoadmapId;
               return (
                 <SidebarTooltip key={roadmap.id} label={roadmap.title} collapsed={collapsed}>
-                  <motion.div
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ ...springSnappy, delay: i * 0.04 }}
-                  >
-                    <Link
+                  <Link
                       href={`/roadmap/${roadmap.id}`}
                       onClick={onNavigate}
                       className={cn(
@@ -197,11 +185,7 @@ export function AppShell({ children }: AppShellProps) {
                           <span className="truncate flex-1 relative z-10">{roadmap.title}</span>
                           {roadmap.isLocked && <LockIcon className="relative z-10" />}
                           {isCurrent && !isActive && (
-                            <motion.span
-                              className="h-1.5 w-1.5 rounded-full bg-accent shrink-0 relative z-10"
-                              animate={{ scale: [1, 1.3, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            />
+                            <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0 relative z-10" />
                           )}
                           <ChevronRight
                             className={cn(
@@ -212,7 +196,6 @@ export function AppShell({ children }: AppShellProps) {
                         </>
                       )}
                     </Link>
-                  </motion.div>
                 </SidebarTooltip>
               );
             })
@@ -299,23 +282,12 @@ export function AppShell({ children }: AppShellProps) {
                 <PanelLeftClose className="h-4 w-4" />
               )}
             </Button>
-            <span className="lg:hidden font-semibold text-sm truncate">Roadmap Planner</span>
+            <span className="lg:hidden font-semibold text-sm truncate text-foreground">Roadmap Planner</span>
           </div>
           <SyncIndicator status={syncStatus} />
         </header>
 
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={pathname}
-            initial={pageEnter.initial}
-            animate={pageEnter.animate}
-            exit={pageEnter.exit}
-            transition={pageEnter.transition}
-            className="flex-1"
-          >
-            {children}
-          </motion.main>
-        </AnimatePresence>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
