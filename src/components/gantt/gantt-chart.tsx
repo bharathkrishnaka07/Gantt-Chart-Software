@@ -13,12 +13,16 @@ import {
   snapToDay,
   clampDate,
   toISODate,
-  TIMELINE_HEADER_HEIGHT,
 } from "@/lib/timeline";
-import { LANE_HEADER_WIDTH, MILESTONE_ROW_HEIGHT } from "@/lib/gantt/layout";
+import { LANE_HEADER_WIDTH, MILESTONE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, getLaneRowHeight } from "@/lib/gantt/layout";
 import { layoutTasksInLane } from "@/lib/gantt/collision";
 import { GanttTimelineHeader } from "./gantt-timeline-header";
-import { GanttSwimLaneRow } from "./gantt-swim-lane-row";
+import {
+  GanttLaneHeaderCorner,
+  GanttLaneLabel,
+  GanttMilestoneLaneLabel,
+} from "./gantt-lane-label";
+import { GanttLaneTimeline } from "./gantt-lane-timeline";
 import { GanttMilestone } from "./gantt-milestone";
 
 interface GanttChartProps {
@@ -43,7 +47,10 @@ export function GanttChart({
   presentationMode = false,
 }: GanttChartProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const lanePanelRef = useRef<HTMLDivElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const syncingScroll = useRef(false);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [milestoneDrag, setMilestoneDrag] = useState<{ id: string; startX: number; originalDate: Date } | null>(null);
   const [dragTargetLane, setDragTargetLane] = useState<string | null>(null);
@@ -149,7 +156,7 @@ export function GanttChart({
       const scrollLeft = scrollRef.current?.scrollLeft ?? 0;
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = e.clientX - rect.left + scrollLeft - LANE_HEADER_WIDTH;
+      const x = e.clientX - rect.left + scrollLeft;
       const date = pixelToDate(x, columns, timelineStart, timelineEnd);
       updateMilestone(roadmap.id, milestoneDrag.id, {
         date: toISODate(clampDate(snapToDay(date), timelineStart, timelineEnd)),
@@ -167,132 +174,186 @@ export function GanttChart({
   }, [milestoneDrag, columns, timelineStart, timelineEnd, updateMilestone, roadmap.id]);
 
   const sortedLanes = [...roadmap.swimLanes].sort((a, b) => a.order - b.order);
-  const totalHeight =
-    sortedLanes.reduce((h, lane) => {
-      if (lane.collapsed) return h + 48;
+
+  const laneRows = useMemo(() => {
+    return sortedLanes.map((lane, index) => {
       const laneTasks = roadmap.tasks.filter((t) => t.laneId === lane.id);
-      return h + layoutTasksInLane(laneTasks, getRect).contentHeight;
-    }, 0) +
-    TIMELINE_HEADER_HEIGHT +
-    MILESTONE_ROW_HEIGHT;
+      const { contentHeight } = layoutTasksInLane(laneTasks, getRect);
+      const rowHeight = getLaneRowHeight(lane.name, contentHeight, lane.collapsed);
+      return { lane, index, contentHeight, rowHeight };
+    });
+  }, [sortedLanes, roadmap.tasks, getRect]);
+
+  const syncVerticalScroll = (source: "lane" | "body") => {
+    if (syncingScroll.current) return;
+    const laneEl = lanePanelRef.current;
+    const bodyEl = scrollRef.current;
+    if (!laneEl || !bodyEl) return;
+    syncingScroll.current = true;
+    if (source === "lane") {
+      bodyEl.scrollTop = laneEl.scrollTop;
+    } else {
+      laneEl.scrollTop = bodyEl.scrollTop;
+    }
+    syncingScroll.current = false;
+  };
+
+  const syncHorizontalScroll = () => {
+    const bodyEl = scrollRef.current;
+    const headerEl = headerScrollRef.current;
+    if (!bodyEl || !headerEl) return;
+    headerEl.scrollLeft = bodyEl.scrollLeft;
+  };
 
   const todayLeft =
     new Date() >= timelineStart && new Date() <= timelineEnd
       ? getMilestonePosition(new Date(), columns, timelineStart, timelineEnd)
       : null;
 
-  return (
-    <div className="relative surface-card overflow-hidden border-border/60">
-      <div
-        ref={scrollRef}
-        className="gantt-scroll overflow-auto bg-white/50"
-        style={{
-          maxHeight: presentationMode
-            ? "calc(100vh - 132px)"
-            : "calc(100vh - 168px)",
-          height: presentationMode ? "calc(100vh - 132px)" : "calc(100vh - 168px)",
-        }}
-      >
-        <div ref={timelineRef} style={{ minWidth: LANE_HEADER_WIDTH + timelineWidth }}>
-          <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />
+  const canvasHeight = presentationMode ? "calc(100vh - 132px)" : "calc(100vh - 168px)";
 
-          {/* Grid lines */}
-          <div className="relative" style={{ height: totalHeight - TIMELINE_HEADER_HEIGHT }}>
-            {todayLeft !== null && (
+  const bodyHeight =
+    MILESTONE_ROW_HEIGHT + laneRows.reduce((sum, row) => sum + row.rowHeight, 0);
+
+  const addTaskToLane = (laneId: string, color: string) => {
+    const mid = new Date(timelineStart);
+    mid.setMonth(mid.getMonth() + 1);
+    const end = new Date(mid);
+    end.setMonth(end.getMonth() + 1);
+    addTask(roadmap.id, {
+      title: "New Task",
+      startDate: toISODate(mid),
+      endDate: toISODate(end),
+      color,
+      laneId,
+      tags: [],
+      links: [],
+      attachments: [],
+      priority: "medium",
+      status: "todo",
+    });
+  };
+
+  return (
+    <div
+      className="relative surface-card overflow-hidden border-border/60 flex flex-col"
+      style={{
+        height: canvasHeight,
+        ["--timeline-header-height" as string]: `${TIMELINE_HEADER_HEIGHT}px`,
+        ["--milestone-row-height" as string]: `${MILESTONE_ROW_HEIGHT}px`,
+      }}
+    >
+      {/* Header row — lane corner stays fixed, dates scroll horizontally */}
+      <div className="flex shrink-0 border-b border-border/60 bg-white shadow-sm z-30">
+        <GanttLaneHeaderCorner />
+        <div ref={headerScrollRef} className="flex-1 overflow-hidden">
+          <GanttTimelineHeader columns={columns} timelineWidth={timelineWidth} />
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0">
+        {/* Lane labels — fixed width, vertical scroll synced with timeline body */}
+        <div
+          ref={lanePanelRef}
+          className="gantt-scroll shrink-0 overflow-y-auto overflow-x-hidden border-r border-border/60 bg-white z-20"
+          style={{ width: LANE_HEADER_WIDTH }}
+          onScroll={() => syncVerticalScroll("lane")}
+        >
+          <GanttMilestoneLaneLabel />
+          {laneRows.map(({ lane, index, rowHeight }) => (
+            <GanttLaneLabel
+              key={lane.id}
+              roadmapId={roadmap.id}
+              lane={lane}
+              rowHeight={rowHeight}
+              isFirst={index === 0}
+              isLast={index === laneRows.length - 1}
+              isLocked={isLocked}
+              isCollapsed={lane.collapsed}
+              onToggleCollapse={() =>
+                updateSwimLane(roadmap.id, lane.id, { collapsed: !lane.collapsed })
+              }
+              onAddTask={() => addTaskToLane(lane.id, lane.color)}
+            />
+          ))}
+        </div>
+
+        {/* Timeline body — horizontal + vertical scroll */}
+        <div
+          ref={scrollRef}
+          className="gantt-scroll flex-1 overflow-auto bg-white/40 min-w-0"
+          onScroll={() => {
+            syncVerticalScroll("body");
+            syncHorizontalScroll();
+          }}
+        >
+          <div ref={timelineRef} style={{ width: timelineWidth, minWidth: timelineWidth }}>
+            <div className="relative" style={{ minHeight: bodyHeight }}>
+              {todayLeft !== null && (
+                <div className="today-line" style={{ left: todayLeft, height: bodyHeight }} />
+              )}
               <div
-                className="today-line"
-                style={{ left: LANE_HEADER_WIDTH + todayLeft, height: "100%" }}
-              />
-            )}
-            <div
-              className="absolute top-0 flex pointer-events-none"
-              style={{ left: LANE_HEADER_WIDTH, width: timelineWidth, height: "100%" }}
-            >
-              {columns.map((col) => (
-                <div
-                  key={col.key}
-                  className="border-r border-dashed border-border/25 h-full shrink-0"
-                  style={{ width: col.width }}
+                className="absolute top-0 flex pointer-events-none"
+                style={{ height: bodyHeight }}
+              >
+                {columns.map((col) => (
+                  <div
+                    key={col.key}
+                    className="border-r border-dashed border-border/25 h-full shrink-0"
+                    style={{ width: col.width }}
+                  />
+                ))}
+              </div>
+
+              <div
+                className="relative border-b border-border/40 bg-slate-50/60"
+                style={{ height: MILESTONE_ROW_HEIGHT }}
+              >
+                {roadmap.milestones.map((ms) => {
+                  const left = getMilestonePosition(
+                    new Date(ms.date),
+                    columns,
+                    timelineStart,
+                    timelineEnd
+                  );
+                  return (
+                    <GanttMilestone
+                      key={ms.id}
+                      milestone={ms}
+                      left={left}
+                      isLocked={isLocked}
+                      onSelect={() => setSelectedMilestoneId(ms.id)}
+                      onDragStart={(e) => {
+                        if (isLocked) return;
+                        setMilestoneDrag({
+                          id: ms.id,
+                          startX: e.clientX,
+                          originalDate: new Date(ms.date),
+                        });
+                      }}
+                    />
+                  );
+                })}
+              </div>
+
+              {laneRows.map(({ lane, contentHeight, rowHeight }) => (
+                <GanttLaneTimeline
+                  key={lane.id}
+                  lane={lane}
+                  tasks={roadmap.tasks}
+                  timelineWidth={timelineWidth}
+                  rowHeight={rowHeight}
+                  contentHeight={contentHeight}
+                  getTaskRect={getRect}
+                  isLocked={isLocked}
+                  selectedTaskId={selectedTaskId}
+                  onSelectTask={setSelectedTaskId}
+                  onDragStart={handleDragStart}
+                  onLaneDragOver={setDragTargetLane}
+                  isDragTarget={dragTargetLane === lane.id}
                 />
               ))}
             </div>
-
-            {/* Milestones row */}
-            <div
-              className="relative border-b border-border/40 bg-slate-50/60"
-              style={{
-                height: MILESTONE_ROW_HEIGHT,
-                marginLeft: LANE_HEADER_WIDTH,
-                width: timelineWidth,
-              }}
-            >
-              {roadmap.milestones.map((ms) => {
-                const left = getMilestonePosition(
-                  new Date(ms.date),
-                  columns,
-                  timelineStart,
-                  timelineEnd
-                );
-                return (
-                  <GanttMilestone
-                    key={ms.id}
-                    milestone={ms}
-                    left={left}
-                    isLocked={isLocked}
-                    onSelect={() => setSelectedMilestoneId(ms.id)}
-                    onDragStart={(e) => {
-                      if (isLocked) return;
-                      setMilestoneDrag({
-                        id: ms.id,
-                        startX: e.clientX,
-                        originalDate: new Date(ms.date),
-                      });
-                    }}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Swim lanes */}
-            {sortedLanes.map((lane, index) => (
-              <GanttSwimLaneRow
-                key={lane.id}
-                roadmapId={roadmap.id}
-                lane={lane}
-                isFirst={index === 0}
-                isLast={index === sortedLanes.length - 1}
-                tasks={roadmap.tasks}
-                timelineWidth={timelineWidth}
-                getTaskRect={getRect}
-                isLocked={isLocked}
-                selectedTaskId={selectedTaskId}
-                onSelectTask={setSelectedTaskId}
-                onToggleCollapse={() =>
-                  updateSwimLane(roadmap.id, lane.id, { collapsed: !lane.collapsed })
-                }
-                onAddTask={() => {
-                  const mid = new Date(timelineStart);
-                  mid.setMonth(mid.getMonth() + 1);
-                  const end = new Date(mid);
-                  end.setMonth(end.getMonth() + 1);
-                  addTask(roadmap.id, {
-                    title: "New Task",
-                    startDate: toISODate(mid),
-                    endDate: toISODate(end),
-                    color: lane.color,
-                    laneId: lane.id,
-                    tags: [],
-                    links: [],
-                    attachments: [],
-                    priority: "medium",
-                    status: "todo",
-                  });
-                }}
-                onDragStart={handleDragStart}
-                onLaneDragOver={setDragTargetLane}
-                isDragTarget={dragTargetLane === lane.id}
-              />
-            ))}
           </div>
         </div>
       </div>
